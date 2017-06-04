@@ -1,0 +1,15 @@
+{
+    "tests":
+    [
+        {
+            "original":     "var x;\n if (x == 0) { x++;",
+            "transformed":  "var x; if (x === 0) { x++;}",
+            "description":  "single missing bracket"
+        },
+        {
+            "original":     "function y() { while (x > 0) { if (x < 3) { x++;",
+            "transformed":  "function y() { while (x > 0) { if (x < 3) { x++;}}}",
+            "description":  "multiple missing bracket"
+        }
+    ]
+}

@@ -1,0 +1,25 @@
+{
+    "tests":
+    [
+        {
+            "original":     "vart x = 100;",
+            "transformed":  "var x = 100;",
+            "description":  "var statement"
+        },
+        {
+            "original":     "contsssss x = 2;",
+            "transformed":  "const x = 2;",
+            "description":  "const"
+        },   
+        {
+            "original":     "varaa x = 100;\nift(x == 2){\n\tx++;\n}",
+            "transformed":  "var x = 100; if(x === 2){ x++; }",
+            "description":  "if statement"
+        },
+        {
+            "original":     "vart dax;\n\nswitch (new Date().getDay()) {\n\n\tcaserr 0:\n\t\tday = 'Sunday';\n\t\tbreak;\n\tcase 1:\n\t\tday = 'Monday';\n\t\tbreak;\n}",
+            "transformed":  "var dax;\n\nswitch (new Date().getDay()) {\n\n\tcase 0:\n\t\tday = 'Sunday';\n\t\tbreak;\n\tcase 1:\n\t\tday = 'Monday';\n\t\tbreak;\n}",
+            "description":  "var and const"
+        }
+    ]
+}

@@ -1,0 +1,66 @@
+<html>
+<head>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.0.js"></script>
+    <script type="text/javascript" src="lib/jslint.js"></script>
+    <script type="text/javascript" src="lib/parse-js.js"></script>
+    <script type="text/javascript" src="src/wordMatcher.js"></script>
+    <script type="text/javascript" src="src/javascirpt-main.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+            $('#btnSubmit').click(function() {
+                $('#errors').text('');
+                $('#output').text('');
+                $('#newprogram').text('');
+
+                var code = $('#jstext').val();
+
+                var result = javascirpt.run(code);
+                if (result.succeeded) {
+                    $('#newprogram').text(result.text);
+                    ast = parse(result.text);
+                    printNode(ast, 0);
+                }
+                else {
+                    $('#errors').text(result.text);
+                }
+            });
+        });
+
+        // print the whole tree, node by node
+        function printNode(node, indents) {
+            if (node == null) return; // empty commands sometimes produce null nodes
+            if (node.constructor === Array) {
+                for(var j = 0; j < node.length; j++) {
+                    printNode(node[j], indents + 1);
+                }
+            } 
+            else {
+                for(var i = 0; i < indents; i++) {
+                    $('#output').append('  ');
+                }
+                $('#output').append(node);
+                $('#output').append("<br/>");
+            }
+        }
+    </script>
+    <title>JavaScirpt</title>
+</head>
+<body>
+    <div style="float: left;">
+        <b>INPUT</b><br>
+        <textarea id="jstext" cols=50 rows=25></textarea>
+        <br />
+        <input type="button" value="Submit" id="btnSubmit" />
+        <br />
+        <div id="errors" style="color: #aa0000;"></div>
+        <br/>
+        <b>SYNTAX TREE</b><br/>
+        <pre><code id="output" style="width: 100%;"></code></pre>
+    </div>
+    <div style="float: left;padding-left: 10px;">
+        <b>OUTPUT</b><br>
+        <pre><code id="newprogram"></code></pre>
+    </div>
+</body>
+</html>

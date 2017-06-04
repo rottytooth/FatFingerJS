@@ -1,0 +1,22 @@
+{
+  "name": "javascirpt",
+  "version": "0.1.0",
+  "description": "Write JS with your fists",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rottytooth/JavaScirpt"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/rottytooth/JavaScirpt/blob/master/license.txt"
+    }
+  ],
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-contrib-concat": "^1.0.1",
+    "grunt-contrib-jshint": "^1.1.0",
+    "grunt-contrib-nodeunit": "^1.0.0",
+    "grunt-contrib-uglify": "~0.5.0"
+  }
+}
