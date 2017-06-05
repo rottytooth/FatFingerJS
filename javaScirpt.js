@@ -6422,7 +6422,7 @@ PRIVATE FUNCTIONS
 
     function addToList(dict, orig, tokenlist) {
         Object.keys(tokenlist).forEach(function(word) {
-            dict.push({ word: word, score: distance(orig.value, word)});
+            dict.push({ word: word, score: distance(orig, word)});
         });    
         return dict;
     }
@@ -6504,6 +6504,8 @@ var javascirpt =
             if (err instanceof JS_Parse_Error) {
                 return false;
             }
+            else
+                throw err;
         }
         return true;
     }
@@ -6524,7 +6526,7 @@ var javascirpt =
     function makeItParse(code) {
 
         // haha, jslint is never going to pass any of this
-        var linted = jslint(code, 'browser: true');
+        var linted = jslint(code, {browser: true});
         if (jslint.ok) {
             return code;
         }
@@ -6599,7 +6601,7 @@ var javascirpt =
     }
 
     function fixBadIdentifiers(code, count) {
-        var relinted = jslint(code, 'browser: true');
+        var relinted = jslint(code, {browser: true});
 
         var varlist = [];
         var global_obj = [];
@@ -6628,6 +6630,10 @@ var javascirpt =
             }
         }
 
+        // varlist["document"] = true;
+        // varlist["chrome"] = true;
+        // varlist["const"] = true;
+
         for(var i = 0; i < relinted.warnings.length;i++) {
             if (relinted.warnings[i].code == "undeclared_a") {
                 // here we will try swapping for each identifier
@@ -6649,7 +6655,7 @@ var javascirpt =
     }
 
     function howManyUndeclareds(code) {
-        var relinted = jslint(code, 'browser: true');
+        var relinted = jslint(code, {browser: true});
 
         var numberOfUndeclareds = 0;
 
@@ -6679,47 +6685,39 @@ var javascirpt =
         for(var locIdx = words.length - 1; locIdx >= 0; locIdx--) { // locIdx = location in the string (by word)
             if (words[locIdx].type != "name") { continue; }
 
-            var wordReplaceList = wordMatcher.findPotentialMatches(words[locIdx]);
+            var wordReplaceList = wordMatcher.findPotentialMatches(words[locIdx].value);
 
             for (var replaceIdx = 0; replaceIdx < wordReplaceList.length; replaceIdx++) // replaceIdx = which replacement word to use
             {
                 var newline = line.substring(0, words[locIdx].pos);
-                var didntparse = false;
                 newline += wordReplaceList[replaceIdx].word;
                 newline += line.substring(words[locIdx].endpos, words[locIdx].length);
                 // console.debug(newline); (for debug)
 
-                try {
-                    parse(newline);
-                } 
-                catch(err) {
-                    if (err instanceof JS_Parse_Error) {
-                        didntparse = true;
-                    }
-                    else throw err;
-                }
                 score = wordReplaceList[replaceIdx].score;
 
-                if (!didntparse) {
+                if (testParseJs(newline)) {
                     possibleLines.push({line:newline, score:wordReplaceList[replaceIdx].score, place:locIdx});
                 }
             }
         }
 
-        var sortedLines = possibleLines.sort(function(a,b) {
-            if (a.score == b.score) {
-                return (a.place > b.place) ? -1 : 1;
-            }
-            else {
-                return (a.score < b.score) ? -1 : 1;
-            }
-        });
+        var sortedLines = possibleLines.sort(lineSorter);
 
         if (sortedLines.length == 0) {
             return null;
         } // we have not found a match
 
         return sortedLines[0].line; // just return the best one
+    }
+
+    function lineSorter(a,b) {
+        if (a.score == b.score) {
+            return (a.place > b.place) ? -1 : 1;
+        }
+        else {
+            return (a.score < b.score) ? -1 : 1;
+        }
     }
 
     return {"run" : run};

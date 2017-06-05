@@ -32,6 +32,8 @@ var javascirpt =
             if (err instanceof JS_Parse_Error) {
                 return false;
             }
+            else
+                throw err;
         }
         return true;
     }
@@ -154,6 +156,8 @@ var javascirpt =
                     varlist[k] = true;
                 }
             }
+        } else {
+            // FIXME: we should add some fake browser stuff here for testing
         }
 
         for(var i = 0; i < relinted.warnings.length;i++) {
@@ -161,14 +165,30 @@ var javascirpt =
                 // here we will try swapping for each identifier
                 var badIdent = relinted.warnings[i].a;
                 var idList = wordMatcher.findPotentialMatches(badIdent, varlist);
+
                 if (idList != null && idList.length > 0) {
                     var lineToFix = relinted.lines[relinted.warnings[i].line];
-                    lineToFix = lineToFix.substr(0, relinted.warnings[i].column) +
-                        idList[0].word +
-                        lineToFix.substring(relinted.warnings[i].column + relinted.warnings[i].a.length,
-                            lineToFix.length);
-                    relinted.lines[relinted.warnings[i].line] = lineToFix;
-                    code = relinted.lines.join("\n");
+
+                    var possibleLines = [];
+
+                    for(var j = 0; j < idList.length; j++) {
+                        var newline = lineToFix.substr(0, relinted.warnings[i].column) +
+                            idList[j].word +
+                            lineToFix.substring(relinted.warnings[i].column + relinted.warnings[i].a.length,
+                                lineToFix.length);
+
+                        if (testParseJs(newline)) {
+                            possibleLines.push({line:newline, score:idList[j].score, place:j});
+                        }
+                    }
+                    var sortedLines = possibleLines.sort(lineSorter);
+
+                    if (!sortedLines || sortedLines.length == 0) {
+                        // we will do nothing in this case -- it means we did not find an identifier replacement that parses
+                    } else {
+                        relinted.lines[relinted.warnings[i].line] = sortedLines[0].line;
+                        code = relinted.lines.join("\n");
+                    }
                 }
             }
         }
@@ -207,47 +227,39 @@ var javascirpt =
         for(var locIdx = words.length - 1; locIdx >= 0; locIdx--) { // locIdx = location in the string (by word)
             if (words[locIdx].type != "name") { continue; }
 
-            var wordReplaceList = wordMatcher.findPotentialMatches(words[locIdx]);
+            var wordReplaceList = wordMatcher.findPotentialMatches(words[locIdx].value);
 
             for (var replaceIdx = 0; replaceIdx < wordReplaceList.length; replaceIdx++) // replaceIdx = which replacement word to use
             {
                 var newline = line.substring(0, words[locIdx].pos);
-                var didntparse = false;
                 newline += wordReplaceList[replaceIdx].word;
                 newline += line.substring(words[locIdx].endpos, words[locIdx].length);
                 // console.debug(newline); (for debug)
 
-                try {
-                    parse(newline);
-                } 
-                catch(err) {
-                    if (err instanceof JS_Parse_Error) {
-                        didntparse = true;
-                    }
-                    else throw err;
-                }
                 score = wordReplaceList[replaceIdx].score;
 
-                if (!didntparse) {
+                if (testParseJs(newline)) {
                     possibleLines.push({line:newline, score:wordReplaceList[replaceIdx].score, place:locIdx});
                 }
             }
         }
 
-        var sortedLines = possibleLines.sort(function(a,b) {
-            if (a.score == b.score) {
-                return (a.place > b.place) ? -1 : 1;
-            }
-            else {
-                return (a.score < b.score) ? -1 : 1;
-            }
-        });
+        var sortedLines = possibleLines.sort(lineSorter);
 
         if (sortedLines.length == 0) {
             return null;
         } // we have not found a match
 
         return sortedLines[0].line; // just return the best one
+    }
+
+    function lineSorter(a,b) {
+        if (a.score == b.score) {
+            return (a.place > b.place) ? -1 : 1;
+        }
+        else {
+            return (a.score < b.score) ? -1 : 1;
+        }
     }
 
     return {"run" : run};

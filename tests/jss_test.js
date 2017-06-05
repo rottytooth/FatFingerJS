@@ -11,9 +11,13 @@ var runTest = function(jsFile, test) {
   for(var i in jsonContent.tests) {
     var codeblock = jsonContent.tests[i];
     console.log("testing " + codeblock.description);
-    var results = javascirpt.run(codeblock.original)
+    var results = javascirpt.run(codeblock.original);
+
+    // does it parse successfully
     test.equal(results.succeeded, true);
-    test.equal(codeblock.transformed.replace(/\s+/g, " "), results.text.replace(/\s+/g, " "));
+
+    // does it look like the expected result, ignoring all whitespace
+    test.equal(codeblock.transformed.replace(/\s+/g, ""), results.text.replace(/\s+/g, ""));
   }
   test.done();
 }
