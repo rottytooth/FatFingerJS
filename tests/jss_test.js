@@ -24,5 +24,8 @@ exports.nodeunit = {
   },
   brackets: function(test) {
     runTest("brackets.json", test);
+  },
+  varnames: function(test) {
+    runTest("varnames.json", test);
   }
 }

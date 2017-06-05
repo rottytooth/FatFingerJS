@@ -3,14 +3,19 @@
 var wordMatcher = 
 (function() {
 
-    function findPotentialMatches(orig) {
+    function findPotentialMatches(orig, dictionary) {
         var dict = [];
 
-        // against keywords
-        addToList(dict, orig, KEYWORDS);
-        addToList(dict, orig, KEYWORDS_ATOM);
-    //    addToList(dict, orig, OPERATORS);
-    //    addToList(dict, orig, OPERATOR_CHARS);
+        if (!dictionary) {
+            
+            // against keywords
+            addToList(dict, orig, KEYWORDS);
+            addToList(dict, orig, KEYWORDS_ATOM);
+            //    addToList(dict, orig, OPERATORS);
+            //    addToList(dict, orig, OPERATOR_CHARS);
+        } else {
+            addToList(dict, orig, dictionary);
+        }
 
         return dict;
     }

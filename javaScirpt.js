@@ -6397,14 +6397,19 @@ var warn = function() {};
 var wordMatcher = 
 (function() {
 
-    function findPotentialMatches(orig) {
+    function findPotentialMatches(orig, dictionary) {
         var dict = [];
 
-        // against keywords
-        addToList(dict, orig, KEYWORDS);
-        addToList(dict, orig, KEYWORDS_ATOM);
-    //    addToList(dict, orig, OPERATORS);
-    //    addToList(dict, orig, OPERATOR_CHARS);
+        if (!dictionary) {
+            
+            // against keywords
+            addToList(dict, orig, KEYWORDS);
+            addToList(dict, orig, KEYWORDS_ATOM);
+            //    addToList(dict, orig, OPERATORS);
+            //    addToList(dict, orig, OPERATOR_CHARS);
+        } else {
+            addToList(dict, orig, dictionary);
+        }
 
         return dict;
     }
@@ -6471,58 +6476,23 @@ var javascirpt =
 
     function run(code) {
         code = addBracketsToEnd(code);
-        var linted = jslint(code, 'browser: true');
 
-        // fixing the "blocking" warnings first
-        // FIXME: this needs to loop until all the "expected_a_b"s are gone or it has failed to clear them (not progressing)
-        if (!linted.ok) {
-            for(var idx = 0; idx < linted.warnings.length; idx++) {
-                var warning = linted.warnings[idx];
-                if (warning.code == "expected_a_b") {
-                    var fixed = false;
-                    if (warning.message.includes("Expected ';'")) {
-                        // jslint just thinks there should be a ; but it's likely that there's a bad command, so let's try to fix it that way first
-                        var currLine = linted.lines[warning.line];
+        code = makeItParse(code);
 
-                        // if we think it needs brackets, give it brackets for the test
-                        var addAndRemoveBrackets = (warning.a == ';' && warning.b == '{');
-                        if (addAndRemoveBrackets) {
-                            currLine += "}";
-                        }
-
-                        var newline = correctLineForKeywords(currLine);
-                        if (newline != null) {
-                            fixed = true;
-
-                            if (addAndRemoveBrackets) { 
-                                newline = newline.substring(0, newline.length - "}".length);
-                            }
-
-                            linted.lines[warning.line] = newline;
-                            code = linted.lines.join("\n");                            
-                        }
-                    }
-                    if (!fixed) {
-                        var line = linted.lines[warning.line];
-                        line = line.substr(0, warning.column) +
-                            linted.warnings[idx].a +
-                            line.substring(warning.column + warning.b.length,
-                                line.length);
-                        linted.lines[warning.line] = line;
-                        code = linted.lines.join("\n");
-                    }
-                }
-            }
+        if (code == null) {
+            var retObj = {
+                succeeded: false,
+                text: code
+            };
+            return retObj;
         }
 
-        var relinted = jslint(code, 'browser: true');
+        code = fixBadIdentifiers(code, howManyUndeclareds(code));
 
-        var retObj =
-        {
+        var retObj = {
             succeeded: true,
             text: code
         };
-
         return retObj;
     }
 
@@ -6540,20 +6510,156 @@ var javascirpt =
 
     function addBracketsToEnd(code) {
         var bracketCount = 0;
-        var lines = code.split(/([{};])/g);
 
-        for(var idx = 0; idx < lines.length; idx++) {
-            if (lines[idx] == "{") {
-                bracketCount++;
-            }
-            if (lines[idx] == "}") {
-                bracketCount--;
+        var opens = (code.match(/{/g) || []).length;
+        var closes = (code.match(/}/g) || []).length;
+
+        for (var idx = 0; idx < opens - closes; idx++) {
+            code += "\n}";            
+        }
+        return code;
+    }
+
+
+    function makeItParse(code) {
+
+        // haha, jslint is never going to pass any of this
+        var linted = jslint(code, 'browser: true');
+        if (jslint.ok) {
+            return code;
+        }
+
+        // get to the real business
+        for(var idx = 0; idx < linted.warnings.length; idx++) {
+            var warning = linted.warnings[idx];
+            if (warning.code == "expected_a_b") {
+                var fixed = false;
+
+                // jslint thinks there should be a ; 
+                // there are a few things this could be: 
+                // 1. a keyword that looks to jslint like a name bc it's misspelled
+                // 2. it's a command that requires parantheses or brackets that are missing
+                // 3. it's really missing a ;
+                if (warning.message.includes("Expected ';'")) {
+
+                    var currLine = linted.lines[warning.line];
+
+                    // if we think it needs brackets, give it brackets for the test
+                    // FIXME: there are cases where we need the brackets but they won't be in warning.b
+                    var addAndRemoveBrackets = (warning.a == ';' && warning.b == '{');
+                    var addedBrackets = "}";
+
+                    if (addAndRemoveBrackets) {
+                        if (!currLine.includes("{")) {
+                            addedBrackets = "{ }"
+                        }
+                        currLine += addedBrackets;
+                    }
+
+                    // make sure it is actually failing to parse before we try to make it parse
+                    // the brute way (using the keyword type difference thing)
+                    var doesparse = testParseJs(currLine);         
+                    
+                    if (!doesparse) {
+                        // FIXME: this will still fail if there are two misspelled keywords on a line
+                        var newline = correctLineForKeywords(currLine);
+                        if (newline != null) {
+                            fixed = true;
+
+                            if (addAndRemoveBrackets) { 
+                                newline = newline.substring(0, newline.length - addedBrackets.length);
+                            }
+
+                            linted.lines[warning.line] = newline;
+                            code = linted.lines.join("\n");                            
+                        }
+                    }
+                }
+
+                // if we haven't fixed it yet, let's just do what jslint tells us to
+                if (!fixed) {
+                    var line = linted.lines[warning.line];
+                    line = line.substr(0, warning.column) +
+                        linted.warnings[idx].a +
+                        line.substring(warning.column + warning.b.length,
+                            line.length);
+                    linted.lines[warning.line] = line;
+                    code = linted.lines.join("\n");
+                }
             }
         }
-        for(var brkAdd = 0; brkAdd < bracketCount; brkAdd++) {
-            lines.push("}");
+        var canParse = testParseJs(code);
+
+        if (!canParse) {
+            return null;
+            // FIXME: add new steps here to help get it parsing
         }
-        return lines.join("");
+
+        return code;
+    }
+
+    function fixBadIdentifiers(code, count) {
+        var relinted = jslint(code, 'browser: true');
+
+        var varlist = [];
+        var global_obj = [];
+
+        // get all the identifiers
+        for (var i = 0; i < relinted.tree.length; i++) {
+            var node = relinted.tree[i];
+            if (node.arity == "statement" && 
+                (node.id == "const" || node.id == "var")) {
+
+                for(var j = 0; j < node.names.length; j++) {
+                    if (node.names[j].role == "variable") {
+                        varlist[node.names[j].id] = true;
+                    }
+                }                
+            }
+        }
+
+        // if not in node
+        if (typeof module === 'undefined' || typeof module.exports === 'undefined') {
+            // get what's in scope from the browser
+            for (var k in window ) {
+                if (typeof window[k] == 'object') {
+                    varlist[k] = true;
+                }
+            }
+        }
+
+        for(var i = 0; i < relinted.warnings.length;i++) {
+            if (relinted.warnings[i].code == "undeclared_a") {
+                // here we will try swapping for each identifier
+                var badIdent = relinted.warnings[i].a;
+                var idList = wordMatcher.findPotentialMatches(badIdent, varlist);
+                if (idList != null && idList.length > 0) {
+                    var lineToFix = relinted.lines[relinted.warnings[i].line];
+                    lineToFix = lineToFix.substr(0, relinted.warnings[i].column) +
+                        idList[0].word +
+                        lineToFix.substring(relinted.warnings[i].column + relinted.warnings[i].a.length,
+                            lineToFix.length);
+                    relinted.lines[relinted.warnings[i].line] = lineToFix;
+                    code = relinted.lines.join("\n");
+                }
+            }
+        }
+
+        return code;        
+    }
+
+    function howManyUndeclareds(code) {
+        var relinted = jslint(code, 'browser: true');
+
+        var numberOfUndeclareds = 0;
+
+        for(var i = 0; i < relinted.warnings.length;i++) {
+            if (relinted.warnings[i].code == "undeclared_a") {
+                numberOfUndeclareds++;
+            }
+        }
+
+        return numberOfUndeclareds;
     }
 
     function correctLineForKeywords(line) {

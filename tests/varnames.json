@@ -1,0 +1,10 @@
+{
+    "tests":
+    [
+        {
+            "original":     "var c = 4; d++;",
+            "transformed":  "var c = 4; c++;",
+            "description":  "single letter variable"
+        }
+    ]
+}
