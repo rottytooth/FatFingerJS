@@ -1,0 +1,10 @@
+{
+    "tests":
+    [
+        {
+            "original":     "\nfuncthion r() {\n\t// do a thing\n}\n\nvar x = funckion()  {\n\tvarr str = 'H3ello, Worrld!'\n\n\trrr();\n\n\r}\n\nxx();",
+            "transformed":  "function r() {\n\t// do a thing\n}\nvar x = function()  {\n\tvar str = 'H3ello, Worrld!';\n\nr();\n};\nx();",
+            "description":  "two different functions, one varred, each called"
+        }
+    ]
+}

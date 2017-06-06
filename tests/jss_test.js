@@ -31,5 +31,8 @@ exports.nodeunit = {
   },
   varnames: function(test) {
     runTest("varnames.json", test);
+  },
+  functions: function(test) {
+    runTest("functions.json", test);
   }
 }

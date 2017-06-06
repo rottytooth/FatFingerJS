@@ -6525,71 +6525,96 @@ var javascirpt =
 
     function makeItParse(code) {
 
-        // haha, jslint is never going to pass any of this
-        var linted = jslint(code, {browser: true});
-        if (jslint.ok) {
-            return code;
-        }
+        var idx = 0;
+        var topIndex = 1;
 
-        // get to the real business
-        for(var idx = 0; idx < linted.warnings.length; idx++) {
-            var warning = linted.warnings[idx];
-            if (warning.code == "expected_a_b") {
-                var fixed = false;
+        // FIXME: potential infinite loop -- need to track and test for this
 
-                // jslint thinks there should be a ; 
-                // there are a few things this could be: 
-                // 1. a keyword that looks to jslint like a name bc it's misspelled
-                // 2. it's a command that requires parantheses or brackets that are missing
-                // 3. it's really missing a ;
-                if (warning.message.includes("Expected ';'")) {
+        // This outer loop is to "reset" jslint each time we make a change.
+        // Not doing so leads to issues when we fix one warning which actually 
+        // resolves multiple warnings (like fixing the word "function" that then satisfies
+        // away the warning about a bracket instead of semicolon, which we would NOT want to fix
+        while (idx < topIndex) {
 
-                    var currLine = linted.lines[warning.line];
+            // haha, jslint is never going to pass any of this
+            var linted = jslint(code, {browser: true});
+            if (jslint.ok) {
+                return code;
+            }
 
-                    // if we think it needs brackets, give it brackets for the test
-                    // FIXME: there are cases where we need the brackets but they won't be in warning.b
-                    var addAndRemoveBrackets = (warning.a == ';' && warning.b == '{');
-                    var addedBrackets = "}";
+            madeAChange = false;
+            topIndex = linted.warnings.length;
 
-                    if (addAndRemoveBrackets) {
-                        if (!currLine.includes("{")) {
-                            addedBrackets = "{ }"
-                        }
-                        currLine += addedBrackets;
-                    }
+            // get to the real business
+            for(idx = 0; idx < linted.warnings.length && madeAChange === false; idx++) {
+                var warning = linted.warnings[idx];
+                if (warning.code == "expected_a_b") {
+                    var fixed = false;
 
-                    // make sure it is actually failing to parse before we try to make it parse
-                    // the brute way (using the keyword type difference thing)
-                    var doesparse = testParseJs(currLine);         
-                    
-                    if (!doesparse) {
-                        // FIXME: this will still fail if there are two misspelled keywords on a line
-                        var newline = correctLineForKeywords(currLine);
-                        if (newline != null) {
-                            fixed = true;
+                    // jslint thinks there should be a ; 
+                    // there are a few things this could be: 
+                    // 1. a keyword that looks to jslint like a name bc it's misspelled
+                    // 2. it's a command that requires parantheses or brackets that are missing
+                    // 3. it's really missing a ;
+                    if (warning.message.includes("Expected ';'")) {
 
-                            if (addAndRemoveBrackets) { 
-                                newline = newline.substring(0, newline.length - addedBrackets.length);
+                        var currLine = linted.lines[warning.line];
+
+                        // if we think it needs brackets, give it brackets for the test
+                        // FIXME: there are cases where we need the brackets but they won't be in warning.b
+                        var addAndRemoveBrackets = (warning.a == ';' && 
+                            (warning.b == '{' || 
+                            currLine.trim().charAt(currLine.length - 1) == "{" ||
+                            (warning.line < linted.lines.length - 2 && 
+                                linted.lines[warning.line + 1].substring(0,1) == "{")));
+                        var addedBrackets = "}";
+
+                        if (addAndRemoveBrackets) {
+                            if (!currLine.includes("{")) {
+                                addedBrackets = "{ }"
                             }
-
-                            linted.lines[warning.line] = newline;
-                            code = linted.lines.join("\n");                            
+                            currLine += addedBrackets;
                         }
-                    }
-                }
 
-                // if we haven't fixed it yet, let's just do what jslint tells us to
-                if (!fixed) {
-                    var line = linted.lines[warning.line];
-                    line = line.substr(0, warning.column) +
-                        linted.warnings[idx].a +
-                        line.substring(warning.column + warning.b.length,
-                            line.length);
-                    linted.lines[warning.line] = line;
-                    code = linted.lines.join("\n");
+                        // make sure it is actually failing to parse before we try to make it parse
+                        // the brute way (using the keyword type difference thing)
+                        var doesparse = testParseJs(currLine);         
+
+                        if (!doesparse) {
+
+                            // FIXME: this will still fail if there are two misspelled keywords on a line
+                            var newline = correctLineForKeywords(currLine);
+                            if (newline != null) {
+                                fixed = true;
+
+                                if (addAndRemoveBrackets) { 
+                                    newline = newline.substring(0, newline.length - addedBrackets.length);
+                                }
+
+                                linted.lines[warning.line] = newline;
+                                code = linted.lines.join("\n");                            
+                            }
+                        }                        
+                    }
+
+                    // if we haven't fixed it yet, let's just do what jslint tells us to
+                    // FIXME: this really needs to actually test if we're in a var statement                        
+                    if (!fixed
+                        && !(warning.a == ";" && !!warning.b && warning.b == ",")) // jslint hates multiple declarations -- let's just assume commas are ok
+                    {
+                        var line = linted.lines[warning.line];
+                        line = line.substr(0, warning.column) +
+                            linted.warnings[idx].a +
+                            line.substring(warning.column + warning.b.length,
+                                line.length);
+                        linted.lines[warning.line] = line;
+                        code = linted.lines.join("\n");
+                    }
+                    madeAChange = true;
                 }
             }
         }
+
         var canParse = testParseJs(code);
 
         if (!canParse) {
@@ -6610,13 +6635,17 @@ var javascirpt =
         for (var i = 0; i < relinted.tree.length; i++) {
             var node = relinted.tree[i];
             if (node.arity == "statement" && 
-                (node.id == "const" || node.id == "var")) {
+                (node.id == "const" || node.id == "var"  || node.id == "function")) {
 
-                for(var j = 0; j < node.names.length; j++) {
-                    if (node.names[j].role == "variable") {
-                        varlist[node.names[j].id] = true;
+                if (node.names) {
+                    for(var j = 0; j < node.names.length; j++) {
+                        if (node.names[j].role == "variable") {
+                            varlist[node.names[j].id] = true;
+                        }
                     }
-                }                
+                } else if (node.name) { // this is primarily for functions
+                    varlist[node.name.id] = true;
+                }
             }
         }
 
@@ -6628,25 +6657,39 @@ var javascirpt =
                     varlist[k] = true;
                 }
             }
+        } else {
+            // FIXME: we should add some fake browser stuff here for testing
         }
-
-        // varlist["document"] = true;
-        // varlist["chrome"] = true;
-        // varlist["const"] = true;
 
         for(var i = 0; i < relinted.warnings.length;i++) {
             if (relinted.warnings[i].code == "undeclared_a") {
                 // here we will try swapping for each identifier
                 var badIdent = relinted.warnings[i].a;
                 var idList = wordMatcher.findPotentialMatches(badIdent, varlist);
+
                 if (idList != null && idList.length > 0) {
                     var lineToFix = relinted.lines[relinted.warnings[i].line];
-                    lineToFix = lineToFix.substr(0, relinted.warnings[i].column) +
-                        idList[0].word +
-                        lineToFix.substring(relinted.warnings[i].column + relinted.warnings[i].a.length,
-                            lineToFix.length);
-                    relinted.lines[relinted.warnings[i].line] = lineToFix;
-                    code = relinted.lines.join("\n");
+
+                    var possibleLines = [];
+
+                    for(var j = 0; j < idList.length; j++) {
+                        var newline = lineToFix.substr(0, relinted.warnings[i].column) +
+                            idList[j].word +
+                            lineToFix.substring(relinted.warnings[i].column + relinted.warnings[i].a.length,
+                                lineToFix.length);
+
+                        if (testParseJs(newline)) {
+                            possibleLines.push({line:newline, score:idList[j].score, place:j});
+                        }
+                    }
+                    var sortedLines = possibleLines.sort(lineSorter);
+
+                    if (!sortedLines || sortedLines.length == 0) {
+                        // we will do nothing in this case -- it means we did not find an identifier replacement that parses
+                    } else {
+                        relinted.lines[relinted.warnings[i].line] = sortedLines[0].line;
+                        code = relinted.lines.join("\n");
+                    }
                 }
             }
         }
