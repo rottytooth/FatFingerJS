@@ -6487,7 +6487,7 @@ var javascirpt =
             return retObj;
         }
 
-        code = fixBadIdentifiers(code, howManyUndeclareds(code));
+        code = fixBadIdentifiers(code);
 
         var retObj = {
             succeeded: true,
@@ -6526,15 +6526,26 @@ var javascirpt =
     function makeItParse(code) {
 
         var idx = 0;
-        var topIndex = 1;
 
-        // FIXME: potential infinite loop -- need to track and test for this
+        // number of warnings to loop through
+        var topIndex = 1; // this will be set at the first lint
+
+        // times through the outer for loop
+        var numberOfLoops = 0;
+
+        // number of times we can loop before it seems like we've exhausted the possibilities and are likely in an infinite loop
+        var maxLoops = 1; // this will be set at the first lint
+
+        // whether maxLoops has been set yet
+        var maxLoopSet = false;
+
+        var madeAChange;
 
         // This outer loop is to "reset" jslint each time we make a change.
         // Not doing so leads to issues when we fix one warning which actually 
         // resolves multiple warnings (like fixing the word "function" that then satisfies
         // away the warning about a bracket instead of semicolon, which we would NOT want to fix
-        while (idx < topIndex) {
+        for (numberOfLoops = 0; idx < topIndex && numberOfLoops < maxLoops; numberOfLoops++) {
 
             // haha, jslint is never going to pass any of this
             var linted = jslint(code, {browser: true});
@@ -6544,6 +6555,10 @@ var javascirpt =
 
             madeAChange = false;
             topIndex = linted.warnings.length;
+
+            if (!maxLoopSet) {
+                maxLoops = (topIndex * (topIndex + 1)) / 2;
+            }
 
             // get to the real business
             for(idx = 0; idx < linted.warnings.length && madeAChange === false; idx++) {
@@ -6625,90 +6640,119 @@ var javascirpt =
         return code;
     }
 
-    function fixBadIdentifiers(code, count) {
-        var relinted = jslint(code, {browser: true});
+    function fixBadIdentifiers(code) {
+
+        // FIXME: there's a lot of repeated logic between here and makeItParse, maybe an opportunity to combine / refactor
+        // especially before we add a third one of these to deal with the object/method names
 
         var varlist = [];
         var global_obj = [];
+        var identifiers = [];
 
-        // get all the identifiers
-        for (var i = 0; i < relinted.tree.length; i++) {
-            var node = relinted.tree[i];
-            if (node.arity == "statement" && 
-                (node.id == "const" || node.id == "var"  || node.id == "function")) {
+        var idx = 0;
 
-                if (node.names) {
-                    for(var j = 0; j < node.names.length; j++) {
-                        if (node.names[j].role == "variable") {
-                            varlist[node.names[j].id] = true;
-                        }
-                    }
-                } else if (node.name) { // this is primarily for functions
-                    varlist[node.name.id] = true;
-                }
-            }
-        }
+        // number of warnings to loop through
+        var topIndex = 1; // this will be set at the first lint
+
+        // times through the outer for loop
+        var numberOfLoops = 0;
+
+        // number of times we can loop before it seems like we've exhausted the possibilities and are likely in an infinite loop
+        var maxLoops = 1; // this will be set at the first lint
+
+        // whether maxLoops has been set yet
+        var maxLoopSet = false;
+
 
         // if not in node
         if (typeof module === 'undefined' || typeof module.exports === 'undefined') {
             // get what's in scope from the browser
             for (var k in window ) {
-                if (typeof window[k] == 'object') {
-                    varlist[k] = true;
-                }
+                // if (typeof window[k] == 'object') {
+                    global_obj[k] = true;
+                // }
             }
         } else {
             // FIXME: we should add some fake browser stuff here for testing
         }
 
-        for(var i = 0; i < relinted.warnings.length;i++) {
-            if (relinted.warnings[i].code == "undeclared_a") {
-                // here we will try swapping for each identifier
-                var badIdent = relinted.warnings[i].a;
-                var idList = wordMatcher.findPotentialMatches(badIdent, varlist);
+        for (numberOfLoops = 0; idx < topIndex && numberOfLoops < maxLoops; numberOfLoops++) {
 
-                if (idList != null && idList.length > 0) {
-                    var lineToFix = relinted.lines[relinted.warnings[i].line];
+            var relinted = jslint(code, {browser: true});
 
-                    var possibleLines = [];
+            madeAChange = false;
+            topIndex = relinted.warnings.length;
 
-                    for(var j = 0; j < idList.length; j++) {
-                        var newline = lineToFix.substr(0, relinted.warnings[i].column) +
-                            idList[j].word +
-                            lineToFix.substring(relinted.warnings[i].column + relinted.warnings[i].a.length,
-                                lineToFix.length);
+            if (!maxLoopSet) {
+                maxLoops = (topIndex * (topIndex + 1)) / 2;
+            }
 
-                        if (testParseJs(newline)) {
-                            possibleLines.push({line:newline, score:idList[j].score, place:j});
+
+            // get all the identifiers
+            for (var i = 0; i < relinted.tree.length; i++) {
+                var node = relinted.tree[i];
+                if (node.arity == "statement" && 
+                    (node.id == "const" || node.id == "var"  || node.id == "function")) {
+
+                    if (node.names) {
+                        for(var j = 0; j < node.names.length; j++) {
+                            if (node.names[j].role == "variable") {
+                                varlist[node.names[j].id] = true;
+                            }
+                        }
+                    } else if (node.name) { // this is primarily for functions
+                        varlist[node.name.id] = true;
+                    }
+
+                    // FIXME: For now, we're treating all parameters as if they are global, in fact JavaScirpt has no idea about scope
+                    if (node.parameters) {
+                        for(var k = 0; k < node.parameters.length; k++) {
+                            varlist[node.parameters[k].id] = true;
                         }
                     }
-                    var sortedLines = possibleLines.sort(lineSorter);
+                }
+            }
 
-                    if (!sortedLines || sortedLines.length == 0) {
-                        // we will do nothing in this case -- it means we did not find an identifier replacement that parses
-                    } else {
-                        relinted.lines[relinted.warnings[i].line] = sortedLines[0].line;
-                        code = relinted.lines.join("\n");
+            identifiers = Object.assign({}, global_obj, varlist);
+
+            for(idx = 0; idx < relinted.warnings.length && madeAChange === false; idx++) {
+
+                madeAChange = false;
+
+                if (relinted.warnings[idx].code == "undeclared_a") {
+                    // here we will try swapping for each identifier
+                    var badIdent = relinted.warnings[idx].a;
+                    var idList = wordMatcher.findPotentialMatches(badIdent, identifiers);
+
+                    if (idList != null && idList.length > 0) {
+                        var lineToFix = relinted.lines[relinted.warnings[idx].line];
+
+                        var possibleLines = [];
+
+                        for(var j = 0; j < idList.length; j++) {
+                            var newline = lineToFix.substr(0, relinted.warnings[idx].column) +
+                                idList[j].word +
+                                lineToFix.substring(relinted.warnings[idx].column + relinted.warnings[idx].a.length,
+                                    lineToFix.length);
+
+                            if (testParseJs(newline)) {
+                                possibleLines.push({line:newline, score:idList[j].score, place:j});
+                            }
+                        }
+                        var sortedLines = possibleLines.sort(lineSorter);
+
+                        if (!sortedLines || sortedLines.length == 0) {
+                            // we will do nothing in this case -- it means we did not find an identifier replacement that parses
+                        } else {
+                            relinted.lines[relinted.warnings[idx].line] = sortedLines[0].line;
+                            code = relinted.lines.join("\n");
+                            madeAChange = true;
+                        }
                     }
                 }
             }
         }
-
         return code;        
-    }
-
-    function howManyUndeclareds(code) {
-        var relinted = jslint(code, {browser: true});
-
-        var numberOfUndeclareds = 0;
-
-        for(var i = 0; i < relinted.warnings.length;i++) {
-            if (relinted.warnings[i].code == "undeclared_a") {
-                numberOfUndeclareds++;
-            }
-        }
-
-        return numberOfUndeclareds;
     }
 
     function correctLineForKeywords(line) {
