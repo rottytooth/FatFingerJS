@@ -20,8 +20,6 @@ var wordMatcher =
         return dict;
     }
 
-
-
 /*
 PRIVATE FUNCTIONS
 */
