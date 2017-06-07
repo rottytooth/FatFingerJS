@@ -1,29 +1,30 @@
 
-var javascirpt =
-(function() {
 
-    function run(code) {
-        code = addBracketsToEnd(code);
+javaScirpt.run = function(code) {
 
-        code = wordReplacer.parseLevel.fixCode(code);
+    code = addBracketsToEnd(code);
 
-        if (code == null) {
-            var retObj = {
-                succeeded: false,
-                text: code
-            };
-            return retObj;
-        }
+    code = javaScirpt.wordReplacer.parseLevel.fixCode(code);
 
-        code = wordReplacer.badIdentifiers.fixCode(code);
-
+    if (code == null) {
         var retObj = {
-            succeeded: true,
+            succeeded: false,
             text: code
         };
         return retObj;
     }
 
+    code = javaScirpt.wordReplacer.badIdentifiers.fixCode(code);
+
+    var retObj = {
+        succeeded: true,
+        text: code
+    };
+    return retObj;
+
+
+
+    // additional private functions
     function addBracketsToEnd(code) {
         var bracketCount = 0;
 
@@ -35,10 +36,8 @@ var javascirpt =
         }
         return code;
     }
+}
 
-
-    return {"run" : run};
-})();
 
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined')
-    module.exports = javascirpt;
+    module.exports = javaScirpt;

@@ -29,4 +29,7 @@ http://danieltemkin.com
 
                                 /*;*/   ;   ;;  ;           /*;*/       ;       ;       ;;              ;
 
-                                
+
+
+var javaScirpt = {};
+

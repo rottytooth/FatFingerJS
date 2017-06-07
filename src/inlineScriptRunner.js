@@ -1,5 +1,5 @@
 
-var inlineScriptRunner =
+javaScirpt.inlineScriptRunner =
 (function() {
 
     function findJavaScirptBlocks() {
@@ -42,7 +42,8 @@ var inlineScriptRunner =
     }
     
     return {"run" : run};
-})();
+})(javaScirpt);
 
+// if we're in a browser, activate the script runner
 if (typeof document !== 'undefined')
-    document.addEventListener('DOMContentLoaded', inlineScriptRunner.run, false);
+    document.addEventListener('DOMContentLoaded', javaScirpt.inlineScriptRunner.run, false);

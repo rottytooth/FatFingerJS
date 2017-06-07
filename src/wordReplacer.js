@@ -2,10 +2,9 @@
 //require("../lib/jslint.js");
 //require("parsingTools.js");
 
-var wordReplacer = 
-(function() {
+javaScirpt.wordReplacer = {};
 
-    var wordReplacerBase = {
+javaScirpt.wordReplacer.wordReplacerBase = {
 
         fixCode: function(code) {
 
@@ -72,212 +71,213 @@ var wordReplacer =
 
     }
 
-    function inherit(proto) {
-        var F = function() { };
-        F.prototype = proto;
-        return new F();
-    }
+javaScirpt.wordReplacer.inherit = function(proto) {
+    var F = function() { };
+    F.prototype = proto;
+    return new F();
+}
 
-    var parseLevel = inherit(wordReplacerBase);
+
+
+
+// PARSE LEVEL WORD REPLACER
+
+javaScirpt.wordReplacer.parseLevel = javaScirpt.wordReplacer.inherit(javaScirpt.wordReplacer.wordReplacerBase);
  
-    // implement template steps
-
-    parseLevel.canWeExit = function(linted) {
-         return linted.ok;
-    }
+javaScirpt.wordReplacer.parseLevel.canWeExit = function(linted) {
+        return linted.ok;
+}
 
  
-    parseLevel.correctText = function(linted, idx, code) {
+javaScirpt.wordReplacer.parseLevel.correctText = function(linted, idx, code) {
 
-        var warning = linted.warnings[idx];
+    var warning = linted.warnings[idx];
 
-        var madeAChange = false;
+    var madeAChange = false;
 
-        if (warning.code == "expected_a_b") {
-            var fixed = false;
+    if (warning.code == "expected_a_b") {
+        var fixed = false;
 
-            // jslint thinks there should be a ; 
-            // there are a few things this could be: 
-            // 1. a keyword that looks to jslint like a name bc it's misspelled
-            // 2. it's a command that requires parantheses or brackets that are missing
-            // 3. it's really missing a ;
-            if (warning.message.includes("Expected ';'")) {
+        // jslint thinks there should be a ; 
+        // there are a few things this could be: 
+        // 1. a keyword that looks to jslint like a name bc it's misspelled
+        // 2. it's a command that requires parantheses or brackets that are missing
+        // 3. it's really missing a ;
+        if (warning.message.includes("Expected ';'")) {
 
-                var currLine = linted.lines[warning.line];
+            var currLine = linted.lines[warning.line];
 
-                // if we think it needs brackets, give it brackets for the test
-                // FIXME: there are cases where we need the brackets but they won't be in warning.b
-                var addAndRemoveBrackets = (warning.a == ';' && 
-                    (warning.b == '{' || 
-                    currLine.trim().charAt(currLine.length - 1) == "{" ||
-                    (warning.line < linted.lines.length - 2 && 
-                        linted.lines[warning.line + 1].substring(0,1) == "{")));
-                var addedBrackets = "}";
+            // if we think it needs brackets, give it brackets for the test
+            // FIXME: there are cases where we need the brackets but they won't be in warning.b
+            var addAndRemoveBrackets = (warning.a == ';' && 
+                (warning.b == '{' || 
+                currLine.trim().charAt(currLine.length - 1) == "{" ||
+                (warning.line < linted.lines.length - 2 && 
+                    linted.lines[warning.line + 1].substring(0,1) == "{")));
+            var addedBrackets = "}";
 
-                if (addAndRemoveBrackets) {
-                    if (!currLine.includes("{")) {
-                        addedBrackets = "{ }"
-                    }
-                    currLine += addedBrackets;
+            if (addAndRemoveBrackets) {
+                if (!currLine.includes("{")) {
+                    addedBrackets = "{ }"
                 }
+                currLine += addedBrackets;
+            }
 
-                // make sure it is actually failing to parse before we try to make it parse
-                // the brute way (using the keyword type difference thing)
-                var doesparse = parsingTools.testParseJs(currLine);         
+            // make sure it is actually failing to parse before we try to make it parse
+            // the brute way (using the keyword type difference thing)
+            var doesparse = javaScirpt.parsingTools.testParseJs(currLine);         
 
-                if (!doesparse) {
+            if (!doesparse) {
 
-                    // FIXME: this will still fail if there are two misspelled keywords on a line
-                    var newline = parsingTools.correctLineForKeywords(currLine);
-                    if (newline != null) {
-                        fixed = true;
+                // FIXME: this will still fail if there are two misspelled keywords on a line
+                var newline = javaScirpt.parsingTools.correctLineForKeywords(currLine);
+                if (newline != null) {
+                    fixed = true;
 
-                        if (addAndRemoveBrackets) { 
-                            newline = newline.substring(0, newline.length - addedBrackets.length);
-                        }
-
-                        linted.lines[warning.line] = newline;
-                        code = linted.lines.join("\n");                            
+                    if (addAndRemoveBrackets) { 
+                        newline = newline.substring(0, newline.length - addedBrackets.length);
                     }
-                }                        
-            }
 
-            // if we haven't fixed it yet, let's just do what jslint tells us to
-            // FIXME: this really needs to actually test if we're in a var statement                        
-            if (!fixed
-                && !(warning.a == ";" && !!warning.b && warning.b == ",")) // jslint hates multiple declarations -- let's just assume commas are ok
-            {
-                var line = linted.lines[warning.line];
-                line = line.substr(0, warning.column) +
-                    linted.warnings[idx].a +
-                    line.substring(warning.column + warning.b.length,
-                        line.length);
-                linted.lines[warning.line] = line;
-                code = linted.lines.join("\n");
-            }
-
-            madeAChange = true;
+                    linted.lines[warning.line] = newline;
+                    code = linted.lines.join("\n");                            
+                }
+            }                        
         }
 
-        var retObj = {
-            madeAChange: madeAChange,
-            code: code
-        };
+        // if we haven't fixed it yet, let's just do what jslint tells us to
+        // FIXME: this really needs to actually test if we're in a var statement                        
+        if (!fixed
+            && !(warning.a == ";" && !!warning.b && warning.b == ",")) // jslint hates multiple declarations -- let's just assume commas are ok
+        {
+            var line = linted.lines[warning.line];
+            line = line.substr(0, warning.column) +
+                linted.warnings[idx].a +
+                line.substring(warning.column + warning.b.length,
+                    line.length);
+            linted.lines[warning.line] = line;
+            code = linted.lines.join("\n");
+        }
 
-        return retObj;
+        madeAChange = true;
     }
 
-    parseLevel.test = function(code) {
-        return parsingTools.testParseJs(code);
+    var retObj = {
+        madeAChange: madeAChange,
+        code: code
     };
 
+    return retObj;
+}
+
+javaScirpt.wordReplacer.parseLevel.test = function(code) {
+    return javaScirpt.parsingTools.testParseJs(code);
+};
 
 
 
-    // BAD IDENTIFIERS
-    var badIdentifiers = inherit(wordReplacerBase);
 
-    // no early exit for bad identifiers
-    badIdentifiers.canWeExit = function(linted) {
-        return false;
+// BAD IDENTIFIERS WORD REPLACER
+
+javaScirpt.wordReplacer.badIdentifiers = javaScirpt.wordReplacer.inherit(javaScirpt.wordReplacer.wordReplacerBase);
+
+// no early exit for bad identifiers
+javaScirpt.wordReplacer.badIdentifiers.canWeExit = function(linted) {
+    return false;
+}
+
+javaScirpt.wordReplacer.badIdentifiers.buildIdentifiers = function(relinted) {
+
+    var varlist = [];
+    var global_obj = [];
+    var identifiers = [];
+
+    // FIXME: we really should not be looping through all this crap so many times -- should be pre-loaded once and re-used with each loop
+    if (typeof module === 'undefined' || typeof module.exports === 'undefined') {
+        // get what's in scope from the browser
+        for (var k in window ) {
+            // if (typeof window[k] == 'object') {
+                global_obj[k] = true;
+            // }
+        }
+    } else {
+        // FIXME: we should add some fake browser stuff here for testing
     }
 
-    badIdentifiers.buildIdentifiers = function(relinted) {
+    for (var i = 0; i < relinted.tree.length; i++) {
+        var node = relinted.tree[i];
+        if (node.arity == "statement" && 
+            (node.id == "const" || node.id == "var"  || node.id == "function")) {
 
-        var varlist = [];
-        var global_obj = [];
-        var identifiers = [];
-
-        // FIXME: we really should not be looping through all this crap so many times -- should be pre-loaded once and re-used with each loop
-        if (typeof module === 'undefined' || typeof module.exports === 'undefined') {
-            // get what's in scope from the browser
-            for (var k in window ) {
-                // if (typeof window[k] == 'object') {
-                    global_obj[k] = true;
-                // }
+            if (node.names) {
+                for(var j = 0; j < node.names.length; j++) {
+                    if (node.names[j].role == "variable") {
+                        varlist[node.names[j].id] = true;
+                    }
+                }
+            } else if (node.name) { // this is primarily for functions
+                varlist[node.name.id] = true;
             }
-        } else {
-            // FIXME: we should add some fake browser stuff here for testing
-        }
 
-        for (var i = 0; i < relinted.tree.length; i++) {
-            var node = relinted.tree[i];
-            if (node.arity == "statement" && 
-                (node.id == "const" || node.id == "var"  || node.id == "function")) {
-
-                if (node.names) {
-                    for(var j = 0; j < node.names.length; j++) {
-                        if (node.names[j].role == "variable") {
-                            varlist[node.names[j].id] = true;
-                        }
-                    }
-                } else if (node.name) { // this is primarily for functions
-                    varlist[node.name.id] = true;
-                }
-
-                // FIXME: For now, we're treating all parameters as if they are global, in fact JavaScirpt has no idea about scope
-                if (node.parameters) {
-                    for(var k = 0; k < node.parameters.length; k++) {
-                        varlist[node.parameters[k].id] = true;
-                    }
-                }
-            }
-        }
-
-        return Object.assign({}, global_obj, varlist);
-    }
-
-    badIdentifiers.correctText = function(relinted, idx, code) {
-        madeAChange = false;
-
-        var identifiers = this.buildIdentifiers(relinted);
-
-        if (relinted.warnings[idx].code == "undeclared_a") {
-            // here we will try swapping for each identifier
-            var badIdent = relinted.warnings[idx].a;
-            var idList = wordMatcher.findPotentialMatches(badIdent, identifiers);
-
-            if (idList != null && idList.length > 0) {
-                var lineToFix = relinted.lines[relinted.warnings[idx].line];
-
-                var possibleLines = [];
-
-                for(var j = 0; j < idList.length; j++) {
-                    var newline = lineToFix.substr(0, relinted.warnings[idx].column) +
-                        idList[j].word +
-                        lineToFix.substring(relinted.warnings[idx].column + relinted.warnings[idx].a.length,
-                            lineToFix.length);
-
-                    if (parsingTools.testParseJs(newline)) {
-                        possibleLines.push({line:newline, score:idList[j].score, place:j});
-                    }
-                }
-                var sortedLines = possibleLines.sort(parsingTools.lineSorter);
-
-                if (!sortedLines || sortedLines.length == 0) {
-                    // we will do nothing in this case -- it means we did not find an identifier replacement that parses
-                } else {
-                    relinted.lines[relinted.warnings[idx].line] = sortedLines[0].line;
-                    code = relinted.lines.join("\n");
-                    madeAChange = true;
+            // FIXME: For now, we're treating all parameters as if they are global, in fact JavaScirpt has no idea about scope
+            if (node.parameters) {
+                for(var k = 0; k < node.parameters.length; k++) {
+                    varlist[node.parameters[k].id] = true;
                 }
             }
         }
-
-        var retObj = {
-            madeAChange: madeAChange,
-            code: code
-        };
-
-        return retObj;
-
     }
 
-    // always return the code, no final test
-    badIdentifiers.test = function(code) {
-        return true;
+    return Object.assign({}, global_obj, varlist);
+}
+
+javaScirpt.wordReplacer.badIdentifiers.correctText = function(relinted, idx, code) {
+    madeAChange = false;
+
+    var identifiers = this.buildIdentifiers(relinted);
+
+    if (relinted.warnings[idx].code == "undeclared_a") {
+        // here we will try swapping for each identifier
+        var badIdent = relinted.warnings[idx].a;
+        var idList = javaScirpt.wordMatcher.findPotentialMatches(badIdent, identifiers);
+
+        if (idList != null && idList.length > 0) {
+            var lineToFix = relinted.lines[relinted.warnings[idx].line];
+
+            var possibleLines = [];
+
+            for(var j = 0; j < idList.length; j++) {
+                var newline = lineToFix.substr(0, relinted.warnings[idx].column) +
+                    idList[j].word +
+                    lineToFix.substring(relinted.warnings[idx].column + relinted.warnings[idx].a.length,
+                        lineToFix.length);
+
+                if (javaScirpt.parsingTools.testParseJs(newline)) {
+                    possibleLines.push({line:newline, score:idList[j].score, place:j});
+                }
+            }
+            var sortedLines = possibleLines.sort(javaScirpt.parsingTools.lineSorter);
+
+            if (!sortedLines || sortedLines.length == 0) {
+                // we will do nothing in this case -- it means we did not find an identifier replacement that parses
+            } else {
+                relinted.lines[relinted.warnings[idx].line] = sortedLines[0].line;
+                code = relinted.lines.join("\n");
+                madeAChange = true;
+            }
+        }
+    }
+
+    var retObj = {
+        madeAChange: madeAChange,
+        code: code
     };
 
-    return {"parseLevel" : parseLevel,
-            "badIdentifiers" : badIdentifiers};
-})();
+    return retObj;
+
+}
+
+// always return the code, no final test
+javaScirpt.wordReplacer.badIdentifiers.test = function(code) {
+    return true;
+};
+
