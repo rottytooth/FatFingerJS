@@ -8,6 +8,8 @@ javaScirpt.wordReplacer.wordReplacerBase = {
 
         fixCode: function(code) {
 
+            this.init();
+
             var idx = 0;
 
             // number of warnings to loop through
@@ -31,7 +33,7 @@ javaScirpt.wordReplacer.wordReplacerBase = {
             // away the warning about a bracket instead of semicolon, which we would NOT want to fix
             do {
 
-                var linted = jslint(code, {browser: true});
+                var linted = jslint(code, {browser: true, multivar: true});
 
                 if (this.canWeExit(linted)) {
                     return code;
@@ -48,8 +50,6 @@ javaScirpt.wordReplacer.wordReplacerBase = {
 
                 // get to the real business
                 for(idx = 0; idx < linted.warnings.length && madeAChange === false; idx++) {
-
-                    // var warning = linted.warnings[idx];
 
                     var results = this.correctText(linted, idx, code);
                     madeAChange = results.madeAChange;
@@ -83,6 +83,8 @@ javaScirpt.wordReplacer.inherit = function(proto) {
 // PARSE LEVEL WORD REPLACER
 
 javaScirpt.wordReplacer.parseLevel = javaScirpt.wordReplacer.inherit(javaScirpt.wordReplacer.wordReplacerBase);
+
+javaScirpt.wordReplacer.parseLevel.init = function(){}
  
 javaScirpt.wordReplacer.parseLevel.canWeExit = function(linted) {
         return linted.ok;
@@ -101,19 +103,19 @@ javaScirpt.wordReplacer.parseLevel.correctText = function(linted, idx, code) {
         // jslint thinks there should be a ; 
         // there are a few things this could be: 
         // 1. a keyword that looks to jslint like a name bc it's misspelled
-        // 2. it's a command that requires parantheses or brackets that are missing
+        // 2. a command that requires parantheses or brackets that are missing
         // 3. it's really missing a ;
         if (warning.message.includes("Expected ';'")) {
 
             var currLine = linted.lines[warning.line];
 
             // if we think it needs brackets, give it brackets for the test
-            // FIXME: there are cases where we need the brackets but they won't be in warning.b
             var addAndRemoveBrackets = (warning.a == ';' && 
-                (warning.b == '{' || 
-                currLine.trim().charAt(currLine.length - 1) == "{" ||
-                (warning.line < linted.lines.length - 2 && 
+                (warning.b == '{' || // jslint sees a bracket and thinks it shouldn't be there 
+                currLine.trim().charAt(currLine.length - 1) == "{" || // our current line ends with a bracket
+                (warning.line < linted.lines.length - 2 && // our next line starts with a bracket
                     linted.lines[warning.line + 1].substring(0,1) == "{")));
+
             var addedBrackets = "}";
 
             if (addAndRemoveBrackets) {
@@ -146,8 +148,7 @@ javaScirpt.wordReplacer.parseLevel.correctText = function(linted, idx, code) {
 
         // if we haven't fixed it yet, let's just do what jslint tells us to
         // FIXME: this really needs to actually test if we're in a var statement                        
-        if (!fixed
-            && !(warning.a == ";" && !!warning.b && warning.b == ",")) // jslint hates multiple declarations -- let's just assume commas are ok
+        if (!fixed)
         {
             var line = linted.lines[warning.line];
             line = line.substr(0, warning.column) +
@@ -180,29 +181,34 @@ javaScirpt.wordReplacer.parseLevel.test = function(code) {
 
 javaScirpt.wordReplacer.badIdentifiers = javaScirpt.wordReplacer.inherit(javaScirpt.wordReplacer.wordReplacerBase);
 
-// no early exit for bad identifiers
-javaScirpt.wordReplacer.badIdentifiers.canWeExit = function(linted) {
-    return false;
-}
+javaScirpt.wordReplacer.badIdentifiers.global_obj = [];
 
-javaScirpt.wordReplacer.badIdentifiers.buildIdentifiers = function(relinted) {
 
-    var varlist = [];
-    var global_obj = [];
-    var identifiers = [];
-
-    // FIXME: we really should not be looping through all this crap so many times -- should be pre-loaded once and re-used with each loop
+// preloading global stuff so we don't loop through it every time
+javaScirpt.wordReplacer.badIdentifiers.init = function() {
     if (typeof module === 'undefined' || typeof module.exports === 'undefined') {
         // get what's in scope from the browser
         for (var k in window ) {
-            // if (typeof window[k] == 'object') {
-                global_obj[k] = true;
-            // }
+            if (k != 'javaScirpt' && k!= 'jslint') { // don't add the framework
+                this.global_obj[k] = true;
+            }
         }
     } else {
         // FIXME: we should add some fake browser stuff here for testing
     }
+}
 
+// no early exit for bad identifiers
+javaScirpt.wordReplacer.badIdentifiers.canWeExit = function(linted) { return false; }
+
+javaScirpt.wordReplacer.badIdentifiers.buildIdentifiers = function(relinted) {
+
+    var varlist = [];
+    var identifiers = [];
+
+    // FIXME: there no scope and it doesn't even know if a var has been declared yet or not.
+    // Perhaps capture line numbers where things are declared and use the tree (since at this stage we can generate one) to help with 
+    // scope? However, public/private is tricky in js and there are cases where you can refer to things that are not yet declared
     for (var i = 0; i < relinted.tree.length; i++) {
         var node = relinted.tree[i];
         if (node.arity == "statement" && 
@@ -227,7 +233,7 @@ javaScirpt.wordReplacer.badIdentifiers.buildIdentifiers = function(relinted) {
         }
     }
 
-    return Object.assign({}, global_obj, varlist);
+    return Object.assign({}, this.global_obj, varlist);
 }
 
 javaScirpt.wordReplacer.badIdentifiers.correctText = function(relinted, idx, code) {
