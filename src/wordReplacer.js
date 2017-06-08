@@ -242,36 +242,51 @@ javaScirpt.wordReplacer.badIdentifiers.canWeExit = function(linted) { return fal
 javaScirpt.wordReplacer.badIdentifiers.buildIdentifiers = function(relinted) {
 
     var varlist = [];
-    var identifiers = [];
 
+    varlist = this.buildLocalIdentifiers(relinted.tree, varlist);
+
+    return Object.assign({}, this.global_obj, varlist);
+}
+
+javaScirpt.wordReplacer.badIdentifiers.buildLocalIdentifiers = function(node, varlist) {
     // FIXME: there no scope and it doesn't even know if a var has been declared yet or not.
     // Perhaps capture line numbers where things are declared and use the tree (since at this stage we can generate one) to help with 
     // scope? However, public/private is tricky in js and there are cases where you can refer to things that are not yet declared
-    for (var i = 0; i < relinted.tree.length; i++) {
-        var node = relinted.tree[i];
-        if (node.arity == "statement" && 
-            (node.id == "const" || node.id == "var"  || node.id == "function")) {
 
-            if (node.names) {
-                for(var j = 0; j < node.names.length; j++) {
-                    if (node.names[j].role == "variable") {
-                        varlist[node.names[j].id] = true;
-                    }
+    if (node.id == "const" || node.id == "var"  || node.id == "function") {
+        if (node.names) {
+            for(var j = 0; j < node.names.length; j++) {
+                if (node.names[j].role == "variable") {
+                    varlist[node.names[j].id] = true;
                 }
-            } else if (node.name) { // this is primarily for functions
-                varlist[node.name.id] = true;
+                if (node.names[j].function) {
+                    varlist = Object.assign({}, varlist, this.buildLocalIdentifiers(node.names[j].function, varlist));
+                }
             }
+        } else if (node.name) { // this is primarily for functions
+            varlist[node.name.id] = true;
+        }
 
-            // FIXME: For now, we're treating all parameters as if they are global, in fact JavaScirpt has no idea about scope
-            if (node.parameters) {
-                for(var k = 0; k < node.parameters.length; k++) {
-                    varlist[node.parameters[k].id] = true;
-                }
+        // FIXME: For now, we're treating all parameters as if they are global, in fact JavaScirpt has no idea about scope
+        if (node.parameters) {
+            for(var k = 0; k < node.parameters.length; k++) {
+                varlist[node.parameters[k].id] = true;
             }
         }
     }
 
-    return Object.assign({}, this.global_obj, varlist);
+    if (Array.isArray(node)) {
+        for (var i = 0; i < node.length; i++) {
+            varlist = Object.assign({}, varlist, this.buildLocalIdentifiers(node[i], varlist));
+        }
+    }
+    if (node.block && node.block.id != "{") {
+        varlist = Object.assign({}, varlist, this.buildLocalIdentifiers(node.block, varlist));
+    }
+    if (node.function) {
+        varlist = Object.assign({}, varlist, this.buildLocalIdentifiers(node.function, varlist));
+    }
+    return varlist;
 }
 
 javaScirpt.wordReplacer.badIdentifiers.correctText = function(relinted, idx, code) {
