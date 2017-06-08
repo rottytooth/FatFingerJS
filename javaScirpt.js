@@ -6583,7 +6583,7 @@ javaScirpt.wordReplacer.wordReplacerBase = {
             // away the warning about a bracket instead of semicolon, which we would NOT want to fix
             do {
 
-                var linted = jslint(code, {browser: true, multivar: true});
+                var linted = jslint(code, {browser: true, multivar: true, for: true});
 
                 if (this.canWeExit(linted)) {
                     return code;
@@ -6637,7 +6637,7 @@ javaScirpt.wordReplacer.parseLevel = javaScirpt.wordReplacer.inherit(javaScirpt.
 javaScirpt.wordReplacer.parseLevel.init = function(){}
  
 javaScirpt.wordReplacer.parseLevel.canWeExit = function(linted) {
-        return linted.ok;
+    return linted.ok;
 }
 
  
@@ -6731,16 +6731,17 @@ javaScirpt.wordReplacer.parseLevel.test = function(code) {
 
 javaScirpt.wordReplacer.badIdentifiers = javaScirpt.wordReplacer.inherit(javaScirpt.wordReplacer.wordReplacerBase);
 
-javaScirpt.wordReplacer.global_obj = [];
+javaScirpt.wordReplacer.badIdentifiers.global_obj = [];
 
+
+// preloading global stuff so we don't loop through it every time
 javaScirpt.wordReplacer.badIdentifiers.init = function() {
-    // FIXME: we really should not be looping through all this crap so many times -- should be pre-loaded once and re-used with each loop
     if (typeof module === 'undefined' || typeof module.exports === 'undefined') {
         // get what's in scope from the browser
         for (var k in window ) {
-            // if (typeof window[k] == 'object') {
+            if (k != 'javaScirpt' && k!= 'jslint') { // don't add the framework
                 this.global_obj[k] = true;
-            // }
+            }
         }
     } else {
         // FIXME: we should add some fake browser stuff here for testing
@@ -6844,6 +6845,8 @@ javaScirpt.run = function(code) {
 
     code = javaScirpt.wordReplacer.parseLevel.fixCode(code);
 
+    code = cleanUpForVars(code);
+
     if (code == null) {
         var retObj = {
             succeeded: false,
@@ -6872,6 +6875,27 @@ javaScirpt.run = function(code) {
         for (var idx = 0; idx < opens - closes; idx++) {
             code += "\n}";            
         }
+        return code;
+    }
+
+    // Usually jslint errors can be ignored, but it sure throws a fucking fit over using for(var ... 
+    // to the point that it prevents jslint from finishing and giving me a tree
+    function cleanUpForVars(code) {
+        var forex = /for\s*\(\s*var/;
+
+        while ((match = forex.exec(code)) != null) {
+            console.log("match found at " + match.index);
+
+            var varstmt = /(var\s+[^;]*)\s*;/.exec(code.substring(match.index, code.length));
+            var remain = /var\s+([^;]*)\s*;/.exec(code.substring(match.index, code.length));
+
+            code = code.substring(0, match.index) + 
+                varstmt[0] + 
+                "\nfor(" + 
+                code.substring(match.index + remain.index + 3, code.length); // the 3 is for the length of "var" -- we already swallowed any leading whitespace
+
+        }
+
         return code;
     }
 }

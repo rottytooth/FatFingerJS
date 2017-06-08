@@ -33,7 +33,7 @@ javaScirpt.wordReplacer.wordReplacerBase = {
             // away the warning about a bracket instead of semicolon, which we would NOT want to fix
             do {
 
-                var linted = jslint(code, {browser: true, multivar: true});
+                var linted = jslint(code, {browser: true, multivar: true, for: true});
 
                 if (this.canWeExit(linted)) {
                     return code;
@@ -87,7 +87,7 @@ javaScirpt.wordReplacer.parseLevel = javaScirpt.wordReplacer.inherit(javaScirpt.
 javaScirpt.wordReplacer.parseLevel.init = function(){}
  
 javaScirpt.wordReplacer.parseLevel.canWeExit = function(linted) {
-        return linted.ok;
+    return linted.ok;
 }
 
  

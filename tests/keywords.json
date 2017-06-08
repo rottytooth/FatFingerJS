@@ -25,6 +25,11 @@
             "original":     "vart day;\n\nswitch (new Date().getDay()) {\n\n\tcaserr 0:\n\t\tday = 'Sunday';\n\t\tbreak;\n\tcase 1:\n\t\tday = 'Monday';\n\t\tbreak;\n}",
             "transformed":  "var day;\n\nswitch (new Date().getDay()) {\n\n\tcase 0:\n\t\tday = 'Sunday';\n\t\tbreak;\n\tcase 1:\n\t\tday = 'Monday';\n\t\tbreak;\n}",
             "description":  "var and switch/case"
+        },
+        {
+            "original":     "varr x = 0;\n\nfor(var t = 0; t < 10; t++) {\n\n\txxx--;\n}\n\nxx++;",
+            "transformed":  "var x = 0;\n\nvar t = 0;\nfor( t = 0; t < 10; t++) {\n\n\tx--;\n}\n\nx++;",
+            "description":  "for loop special handling"
         }
     ]
 }
