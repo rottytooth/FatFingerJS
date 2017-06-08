@@ -4,9 +4,10 @@ javaScirpt.run = function(code) {
 
     code = addBracketsToEnd(code);
 
-    code = javaScirpt.wordReplacer.parseLevel.fixCode(code);
-
     code = cleanUpForVars(code);
+
+    // if it doesn't parse, fix that first
+    code = javaScirpt.wordReplacer.parseLevel.fixCode(code);
 
     if (code == null) {
         var retObj = {

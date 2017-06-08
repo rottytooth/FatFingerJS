@@ -28,8 +28,8 @@
         },
         {
             "original":     "varr x = 0;\n\nfor(var t = 0; t < 10; t++) {\n\n\txxx--;\n}\n\nxx++;",
-            "transformed":  "var x = 0;\n\nvar t = 0;\nfor( t = 0; t < 10; t++) {\n\n\tx--;\n}\n\nx++;",
-            "description":  "for loop special handling"
+            "transformed":  "var x = 0;\n\nvar t = 0;\nfor( t = 0; t < 10; t+=1) {\n\n\tx--;\n}\n\nx++;",
+            "description":  "for loop special handling plus ++ to +="
         }
     ]
 }

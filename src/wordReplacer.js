@@ -146,6 +146,44 @@ javaScirpt.wordReplacer.parseLevel.correctText = function(linted, idx, code) {
             }                        
         }
 
+        // oh god here's another stupid thing because it's fatal for jslint: add brackets around single statements
+        if (warning.message.includes("Expected '{'") &&
+            javaScirpt.parsingTools.testParseJs(code)) { // we make sure it parses first bc this is not an error that should break parsing by a normal parsing engine like parse-js: let's make sure it's the thing it seems to be
+
+            // jslint warning won't tell us actual char location, so we have to find line this way
+            var howManyNewlines = 0;
+            var charidx = 0;
+            for (charidx = 0; howManyNewlines < warning.line; charidx++) {
+                if (code[charidx] == "\n") {
+                    howManyNewlines++;
+                }
+            }
+
+            charidx += warning.column;
+
+            var newCode = code.substring(0, charidx);
+
+            newCode += " {\n";
+
+            for ( ; code[charidx] != ";"; charidx++) {
+                newCode += code[charidx];
+            }
+
+            newCode += code[charidx];
+            charidx++;
+
+            newCode += "\n}"
+
+            newCode += code.substring(charidx, code.length);
+
+            if (javaScirpt.parsingTools.testParseJs(newCode)) {
+                // make sure we didn't break the code
+                code = newCode;
+                fixed = true;
+            }
+            
+        }
+
         // if we haven't fixed it yet, let's just do what jslint tells us to
         // FIXME: this really needs to actually test if we're in a var statement                        
         if (!fixed)
