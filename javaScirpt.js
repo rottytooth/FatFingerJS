@@ -6583,7 +6583,8 @@ javaScirpt.wordReplacer.wordReplacerBase = {
             // away the warning about a bracket instead of semicolon, which we would NOT want to fix
             do {
 
-                var linted = jslint(code, {browser: true, multivar: true, for: true});
+                // setting jslint at pretty tolerant settings. We can just ignore warnings we don't like, but trying to stop jslint from tripping up on bs and not giving us a tree
+                var linted = jslint(code, {browser: true, multivar: true, for: true, this: true, white: true, devel: true, single: true});
 
                 if (this.canWeExit(linted)) {
                     return code;
@@ -6662,7 +6663,7 @@ javaScirpt.wordReplacer.parseLevel.correctText = function(linted, idx, code) {
             // if we think it needs brackets, give it brackets for the test
             var addAndRemoveBrackets = (warning.a == ';' && 
                 (warning.b == '{' || // jslint sees a bracket and thinks it shouldn't be there 
-                currLine.trim().charAt(currLine.length - 1) == "{" || // our current line ends with a bracket
+                currLine.trim().charAt(currLine.trim().length - 1) == "{" || // our current line ends with a bracket
                 (warning.line < linted.lines.length - 2 && // our next line starts with a bracket
                     linted.lines[warning.line + 1].substring(0,1) == "{")));
 

@@ -13,12 +13,12 @@
         },
         {
             "original":     "var test = funktion(code) {\n\tif (t == 5)\ntert('hello');\n\ttry {\n\tvar t= terst(t);\n\t}\n\tcatch(err) {\nreturn false;\n}\n\treturn true;\n};",
-            "transformed":  "var test = function(code) {\nif (t === 5)\n{\ntest('hello');\n}\ntry {\n\tvar t= test(t);}\ncatch(err)\n{\n\treturn false;\n}\nreturn true;\n};",
+            "transformed":  "var test = function(code) {\nif (t == 5)\n{\ntest('hello');\n}\ntry {\n\tvar t= test(t);}\ncatch(err)\n{\n\treturn false;\n}\nreturn true;\n};",
             "description":  "complex example with missing brackets"
         },
         {
             "original":     "var test = funktion(code) {\n\tif (t == 5) tert('hello');\n\ttry {\n\tvar t= terst(t);\n\t}\n\tcatch(err) {\nreturn false;\n}\n\treturn true;\n};",
-            "transformed":  "var test = function(code) {\nif (t === 5)\n{\ntest('hello');\n}\ntry {\n\tvar t= test(t);}\ncatch(err)\n{\n\treturn false;\n}\nreturn true;\n};",
+            "transformed":  "var test = function(code) {\nif (t == 5)\n{\ntest('hello');\n}\ntry {\n\tvar t= test(t);}\ncatch(err)\n{\n\treturn false;\n}\nreturn true;\n};",
             "description":  "complex example with missing brackets, no newline after if"
         }
     ]
