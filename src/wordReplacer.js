@@ -256,14 +256,14 @@ javaScirpt.wordReplacer.badIdentifiers.buildLocalIdentifiers = function(node, va
     if (node.id == "const" || node.id == "var"  || node.id == "function") {
         if (node.names) {
             for(var j = 0; j < node.names.length; j++) {
-                if (node.names[j].role == "variable") {
+                if (node.names[j].role == "variable" || node.names[j].role == "parameter") {
                     varlist[node.names[j].id] = true;
                 }
-                if (node.names[j].function) {
-                    varlist = Object.assign({}, varlist, this.buildLocalIdentifiers(node.names[j].function, varlist));
+                if (node.names[j].function && node.names[j].expression) {
+                    varlist = Object.assign({}, varlist, this.buildLocalIdentifiers(node.names[j].expression, varlist));
                 }
             }
-        } else if (node.name) { // this is primarily for functions
+        } else if (node.name && node.name.id) { // this is primarily for functions
             varlist[node.name.id] = true;
         }
 
@@ -280,11 +280,17 @@ javaScirpt.wordReplacer.badIdentifiers.buildLocalIdentifiers = function(node, va
             varlist = Object.assign({}, varlist, this.buildLocalIdentifiers(node[i], varlist));
         }
     }
-    if (node.block && node.block.id != "{") {
+    if (node.block && node.block.id != "{") { // check for { to avoid infinite loop
         varlist = Object.assign({}, varlist, this.buildLocalIdentifiers(node.block, varlist));
     }
-    if (node.function) {
-        varlist = Object.assign({}, varlist, this.buildLocalIdentifiers(node.function, varlist));
+
+    // FIXME: this should be reorganized. It's not clear we always want to look at context or if this may lead to infinite loops with the weird tree jslint gives us
+    if (node.context) { // this is if we're in a function; we get the local context for params and vars
+        Object.keys(node.context).forEach(function(word) {
+            if (!varlist[word]) {
+                varlist[word] = true;
+            }
+        });   
     }
     return varlist;
 }

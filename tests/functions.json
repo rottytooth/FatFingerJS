@@ -2,14 +2,19 @@
     "tests":
     [
         {
-            "original":     "\nfuncthion r() {\n\t// do a thing\n}\n\nvar x = funckion()  {\n\tvarr str = 'H3ello, Worrld!'\n\n\trrr();\n\n\r}\n\nxx();",
+            "original":     "functhion r() {\n\t// do a thing\n}\n\nvar x = funckion()  {\n\tvarr str = 'H3ello, Worrld!'\n\n\trr();\n\n\r}\n\nxx();",
             "transformed":  "function r() {\n\t// do a thing\n}\nvar x = function()  {\n\tvar str = 'H3ello, Worrld!';\n\nr();\n};\nx();",
-            "description":  "two different functions, one varred, each called"
+            "description":  "two different functions, one varred, each called, missing paranetheses"
         },
         {
             "original":     "vartasd x = 1\n\nfuncktion testr(r) {\n\ttestz(rr);\n}\n\ntest(xx);",
             "transformed":  "var x = 1;\n\nfunction testr(r) {\n\ttestr(r);\n}\ntestr(x);",
             "description":  "function with parameter; function, var, the variable, and the parameter misspelled"
+        },
+        {
+            "original":     "var g = {};\n\ng.test = '';\n\nvar h = function(i) {\n\tvar m;\n\ti++;\n\tmm = ii;\n}\n\nfunction j(test1) {\n\tvar k = test2;\n\tkk++;\n}\n\nj(gg);\nh(ga);",
+            "transformed":  "var g = {};\n\ng.test = '';\n\nvar h = function(i) {\n\tvar m;\n\ti++;\n\tm = i;\n};\n\nfunction j(test1) {\n\tvar k = test1;\n\tk++;\n}\n\nj(g);\nh(g);",
+            "description":  "two types of functions; with params and local vars"
         }
     ]
 }
