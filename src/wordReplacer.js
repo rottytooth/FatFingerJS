@@ -8,8 +8,6 @@ javaScirpt.wordReplacer.wordReplacerBase = {
 
         fixCode: function(code) {
 
-            this.init();
-
             var idx = 0;
 
             // number of warnings to loop through
@@ -84,8 +82,6 @@ javaScirpt.wordReplacer.inherit = function(proto) {
 // PARSE LEVEL WORD REPLACER
 
 javaScirpt.wordReplacer.parseLevel = javaScirpt.wordReplacer.inherit(javaScirpt.wordReplacer.wordReplacerBase);
-
-javaScirpt.wordReplacer.parseLevel.init = function(){}
  
 javaScirpt.wordReplacer.parseLevel.canWeExit = function(linted) {
     return linted.ok;
@@ -220,22 +216,24 @@ javaScirpt.wordReplacer.parseLevel.test = function(code) {
 
 javaScirpt.wordReplacer.badIdentifiers = javaScirpt.wordReplacer.inherit(javaScirpt.wordReplacer.wordReplacerBase);
 
-javaScirpt.wordReplacer.badIdentifiers.global_obj = [];
-
-
 // preloading global stuff so we don't loop through it every time
-javaScirpt.wordReplacer.badIdentifiers.init = function() {
+javaScirpt.wordReplacer.loadGlobals = function() {
+    globals = [];
     if (typeof module === 'undefined' || typeof module.exports === 'undefined') {
         // get what's in scope from the browser
         for (var k in window ) {
             if (k != 'javaScirpt' && k!= 'jslint') { // don't add the framework
-                this.global_obj[k] = true;
+                globals[k] = true;
             }
         }
     } else {
         // FIXME: we should add some fake browser stuff here for testing
     }
+    return globals;
 }
+
+javaScirpt.wordReplacer.badIdentifiers.global_obj = javaScirpt.wordReplacer.loadGlobals();
+
 
 // no early exit for bad identifiers
 javaScirpt.wordReplacer.badIdentifiers.canWeExit = function(linted) { return false; }
