@@ -49,6 +49,16 @@
             }
         });
 
+        $(document).ready(function () {
+            $('#cbTree').change(function () {
+                if ($('#cbTree').is(':checked')) {
+                    $('#treeHolder').show();
+                } else {
+                    $('#treeHolder').hide();
+                }
+            });
+        });
+
         // print the whole tree, node by node
         function printNode(node, indents) {
             if (node == null) return; // empty commands sometimes produce null nodes
@@ -66,23 +76,60 @@
             }
         }
     </script>
+    <style type="text/css">
+    .boxy {
+        -moz-appearance: textfield-multiline;
+        -webkit-appearance: textarea;
+        border: 1px solid gray;
+        font: medium -moz-fixed;
+        font: -webkit-small-control;
+        overflow: auto;
+        padding: 0px;
+        resize: both;
+        width: 400px;
+        height: 400px;
+        margin: 0px;
+    }
+    .holder {
+        margin: 10px;
+        float: left;
+    }
+    h2 {
+        margin-left: 10px;
+    }
+    #treeHolder {
+        display: none;
+    }
+    </style>
     <title>JavaScirpt</title>
 </head>
 <body>
-    <div style="float: left;">
-        <b>INPUT</b><br>
-        <textarea id="jstext" cols=50 rows=25></textarea>
+    <h2>Test your JavaScirpt code</h2>
+    <div class="holder">
+        <b>INPUT (JavaScirpt)</b><br><br>
+        <textarea id="jstext" class="boxy">
+vart x = "Hullllo Werldd!"
+
+dokkcccccccccccccumint.rit3(xx)            
+        </textarea>
         <br />
         <input type="button" value="Submit" id="btnSubmit" />
+        <input type="checkbox" value="tree" id="cbTree" /><label for="cbTree">Draw Syntax Tree</label>
         <br />
         <div id="errors" style="color: #aa0000;"></div>
         <br/>
-        <b>SYNTAX TREE</b><br/>
-        <pre><code id="output" style="width: 100%;"></code></pre>
     </div>
-    <div style="float: left;padding-left: 10px;">
-        <b>OUTPUT</b><br>
-        <pre><code id="newprogram"></code></pre>
+    <div class="holder">
+        <b>OUTPUT (conventional JavaScript)</b><br><br>
+        <div id="outbox" class="boxy">
+            <pre><code id="newprogram"></code></pre>
+        </div>
+    </div>
+    <div class="holder" id="treeHolder">
+        <b>SYNTAX TREE</b><br/><br/>
+        <div class="boxy">
+            <pre><code id="output" style="width: 100%;"></code></pre>
+        </div>
     </div>
 </body>
 </html>
