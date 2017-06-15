@@ -17,8 +17,13 @@ javaScirpt.run = function(code) {
         return retObj;
     }
 
+    // look for variables and objects we don't recognize
     code = javaScirpt.wordReplacer.badIdentifiers.fixCode(code);
 
+    // if there are obj members we don't recognize, see if we can guess what they should be
+    code = javaScirpt.wordReplacer.memberFix.fixCode(code);
+
+    // we consider that is succeeded if it parses
     var retObj = {
         succeeded: true,
         text: code

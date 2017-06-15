@@ -4,71 +4,143 @@
 
 javaScirpt.wordReplacer = {};
 
+// template design pattern
 javaScirpt.wordReplacer.wordReplacerBase = {
 
-        fixCode: function(code) {
+    fixCode: function(code) {
 
-            var idx = 0;
+        var idx = 0;
 
-            // number of warnings to loop through
-            var topIndex = 1; // this will be set at the first lint
+        // number of warnings to loop through
+        var topIndex = 1; // this will be set at the first lint
 
-            // times through the outer for loop
-            var numberOfLoops = 0;
+        // times through the outer for loop
+        var numberOfLoops = 0;
 
-            // number of times we can loop before it seems like we've exhausted the possibilities and are likely in an infinite loop
-            var maxLoops; // this will be set at the first lint
+        // number of times we can loop before it seems like we've exhausted the possibilities and are likely in an infinite loop
+        var maxLoops; // this will be set at the first lint
 
-            // whether maxLoops has been set yet
-            var maxLoopSet = false;
+        // whether maxLoops has been set yet
+        var maxLoopSet = false;
 
-            // whether we've altered the original code and need to reevaluate (re-lint) for a new set of warnings (and identifier locations)
-            var madeAChange;
+        // whether we've altered the original code and need to reevaluate (re-lint) for a new set of warnings (and identifier locations)
+        var madeAChange;
 
-            // This outer loop is to "reset" jslint each time we make a change.
-            // Not doing so leads to issues when we fix one warning which actually 
-            // resolves multiple warnings (like fixing the word "function" that then satisfies
-            // away the warning about a bracket instead of semicolon, which we would NOT want to fix
-            do {
+        // This outer loop is to "reset" jslint each time we make a change.
+        // Not doing so leads to issues when we fix one warning which actually 
+        // resolves multiple warnings (like fixing the word "function" that then satisfies
+        // away the warning about a bracket instead of semicolon, which we would NOT want to fix
+        do {
 
-                // setting jslint at pretty tolerant settings. We can just ignore warnings we don't like, but trying to stop jslint from tripping up on bs and not giving us a tree
-                var linted = jslint(code, {browser: true, multivar: true, for: true, this: true, white: true, devel: true, single: true});
+            // setting jslint at pretty tolerant settings. We can just ignore warnings we don't like, but trying to stop jslint from tripping up on bs and not giving us a tree
+            var linted = jslint(code, {browser: true, multivar: true, for: true, this: true, white: true, devel: true, single: true});
 
-                if (this.canWeExit(linted)) {
-                    return code;
-                }
+            if (this.canWeExit(linted)) {
+                return code;
+            }
 
-                madeAChange = false; // reset
+            madeAChange = false; // reset
 
-                topIndex = linted.warnings.length;
+            topIndex = linted.warnings.length;
 
-                if (!maxLoopSet) {
-                    // this assumes that the first lint gives us more warnings than we will get on subsequent ones. Might be worth re-testing and increasing if not
-                    maxLoops = (topIndex * (topIndex + 1)) / 2;
-                }
+            if (!maxLoopSet) {
+                // this assumes that the first lint gives us more warnings than we will get on subsequent ones. Might be worth re-testing and increasing if not
+                maxLoops = (topIndex * (topIndex + 1)) / 2;
+            }
 
-                // get to the real business
+            // get to the real business
+            // if we're not using the jslint warnings, call the alternate search
+            if (this.alternateSearch) { 
+                var results = this.alternateSearch(linted, code);
+                madeAChange = results.madeAChange;
+                code = results.code;
+            } else {
                 for(idx = 0; idx < linted.warnings.length && madeAChange === false; idx++) {
 
                     var results = this.correctText(linted, idx, code);
                     madeAChange = results.madeAChange;
                     code = results.code;
                 }
-
-                numberOfLoops++;
-
-            } while (idx < topIndex && numberOfLoops < maxLoops);
-
-
-            if (!this.test(code)) {
-                return null;
             }
+            numberOfLoops++;
 
-            return code;
+        } while (idx < topIndex && numberOfLoops < maxLoops);
 
+
+        if (!this.test(code)) {
+            return null;
         }
 
+        return code;
+
+    },
+
+    replaceWord(lineToFix, warning, oldWord, newWord) {
+
+        var start = 0;
+
+        if (warning.column) start = warning.column;
+        if (warning.from) start = warning.from;
+
+        return lineToFix.substr(0, start) +
+            newWord.word +
+            lineToFix.substring(start + oldWord.length,
+            lineToFix.length);
+    },
+
+    buildLocalIdentifiers(node, varlist) {
+        // FIXME: there no scope and it doesn't even know if a var has been declared yet or not.
+        // Perhaps capture line numbers where things are declared and use the tree (since at this stage we can generate one) to help with 
+        // scope? However, public/private is tricky in js and there are cases where you can refer to things that are not yet declared
+
+        if (node.id == "const" || node.id == "var"  || node.id == "function") {
+            if (node.names) {
+                for(var j = 0; j < node.names.length; j++) {
+                    if (node.names[j].role == "variable" || node.names[j].role == "parameter") {
+                        varlist[node.names[j].id] = true;
+                    }
+                    if (node.names[j].expression) {
+                        varlist = Object.assign({}, varlist, this.buildLocalIdentifiers(node.names[j].expression, varlist));
+                    }
+                }
+            } else if (node.name && node.name.id) { // this is primarily for functions
+                varlist[node.name.id] = true;
+            } else if (node.name && typeof node.name == "string") {
+                varlist[node.name] = true;
+            }
+
+            // FIXME: For now, we're treating all parameters as if they are global, in fact JavaScirpt has no idea about scope
+            if (node.parameters) {
+                for(var k = 0; k < node.parameters.length; k++) {
+                    varlist[node.parameters[k].id] = true;
+                }
+            }
+        }
+
+        if (Array.isArray(node)) {
+            for (var i = 0; i < node.length; i++) {
+                varlist = Object.assign({}, varlist, this.buildLocalIdentifiers(node[i], varlist));
+            }
+        }
+        if (node.block && node.block.id != "{") { // check for { to avoid infinite loop
+            varlist = Object.assign({}, varlist, this.buildLocalIdentifiers(node.block, varlist));
+        }
+
+        // FIXME: this should be reorganized. It's not clear we always want to look at context or if this may lead to infinite loops with the weird tree jslint gives us
+        if (node.context) { // this is if we're in a function; we get the local context for params and vars
+            Object.keys(node.context).forEach(function(word) {
+                if (!varlist[word]) {
+                    varlist[word] = true;
+                }
+            });   
+        }
+        if (node.expression) {
+            varlist = Object.assign({}, varlist, this.buildLocalIdentifiers(node.expression, varlist));
+        }
+        return varlist;
     }
+
+}
 
 javaScirpt.wordReplacer.inherit = function(proto) {
     var F = function() { };
@@ -247,53 +319,6 @@ javaScirpt.wordReplacer.badIdentifiers.buildIdentifiers = function(relinted) {
     return Object.assign({}, this.global_obj, varlist);
 }
 
-javaScirpt.wordReplacer.badIdentifiers.buildLocalIdentifiers = function(node, varlist) {
-    // FIXME: there no scope and it doesn't even know if a var has been declared yet or not.
-    // Perhaps capture line numbers where things are declared and use the tree (since at this stage we can generate one) to help with 
-    // scope? However, public/private is tricky in js and there are cases where you can refer to things that are not yet declared
-
-    if (node.id == "const" || node.id == "var"  || node.id == "function") {
-        if (node.names) {
-            for(var j = 0; j < node.names.length; j++) {
-                if (node.names[j].role == "variable" || node.names[j].role == "parameter") {
-                    varlist[node.names[j].id] = true;
-                }
-                if (node.names[j].function && node.names[j].expression) {
-                    varlist = Object.assign({}, varlist, this.buildLocalIdentifiers(node.names[j].expression, varlist));
-                }
-            }
-        } else if (node.name && node.name.id) { // this is primarily for functions
-            varlist[node.name.id] = true;
-        }
-
-        // FIXME: For now, we're treating all parameters as if they are global, in fact JavaScirpt has no idea about scope
-        if (node.parameters) {
-            for(var k = 0; k < node.parameters.length; k++) {
-                varlist[node.parameters[k].id] = true;
-            }
-        }
-    }
-
-    if (Array.isArray(node)) {
-        for (var i = 0; i < node.length; i++) {
-            varlist = Object.assign({}, varlist, this.buildLocalIdentifiers(node[i], varlist));
-        }
-    }
-    if (node.block && node.block.id != "{") { // check for { to avoid infinite loop
-        varlist = Object.assign({}, varlist, this.buildLocalIdentifiers(node.block, varlist));
-    }
-
-    // FIXME: this should be reorganized. It's not clear we always want to look at context or if this may lead to infinite loops with the weird tree jslint gives us
-    if (node.context) { // this is if we're in a function; we get the local context for params and vars
-        Object.keys(node.context).forEach(function(word) {
-            if (!varlist[word]) {
-                varlist[word] = true;
-            }
-        });   
-    }
-    return varlist;
-}
-
 javaScirpt.wordReplacer.badIdentifiers.correctText = function(relinted, idx, code) {
     madeAChange = false;
 
@@ -310,10 +335,7 @@ javaScirpt.wordReplacer.badIdentifiers.correctText = function(relinted, idx, cod
             var possibleLines = [];
 
             for(var j = 0; j < idList.length; j++) {
-                var newline = lineToFix.substr(0, relinted.warnings[idx].column) +
-                    idList[j].word +
-                    lineToFix.substring(relinted.warnings[idx].column + relinted.warnings[idx].a.length,
-                        lineToFix.length);
+                var newline = this.replaceWord(lineToFix, relinted.warnings[idx], relinted.warnings[idx].a, idList[j])
 
                 if (javaScirpt.parsingTools.testParseJs(newline)) {
                     possibleLines.push({line:newline, score:idList[j].score, place:j});
@@ -341,7 +363,86 @@ javaScirpt.wordReplacer.badIdentifiers.correctText = function(relinted, idx, cod
 }
 
 // always return the code, no final test
-javaScirpt.wordReplacer.badIdentifiers.test = function(code) {
-    return true;
-};
+javaScirpt.wordReplacer.badIdentifiers.test = function(code) { return true; };
 
+
+
+// BAD IDENTIFIERS WORD REPLACER
+
+javaScirpt.wordReplacer.memberFix = javaScirpt.wordReplacer.inherit(javaScirpt.wordReplacer.wordReplacerBase);
+
+javaScirpt.wordReplacer.memberFix.global_obj = javaScirpt.wordReplacer.loadGlobals();
+
+javaScirpt.wordReplacer.memberFix.canWeExit = function(linted) { }
+
+javaScirpt.wordReplacer.memberFix.test = function(code) { return true; };
+
+// We are not dealing with the warnings this loop, but with the tree itself. We need to allow
+// for resetting the tree, since changing names will change string lengths and so locations
+javaScirpt.wordReplacer.memberFix.lastCheckedLocation = 0;
+
+javaScirpt.wordReplacer.memberFix.treeWalker = function(node, code, linted, allLocalObjects) {
+    if (Array.isArray(node)) {
+        for (var i = 0; i < node.length; i++) {
+            code = this.treeWalker(node[i], code, linted, allLocalObjects);
+        }
+    }
+    if (node.id && node.id == ".") {
+        // we're in a dot expression
+        var frontOfDot = false;
+        var endOfDot = false;
+
+        if (node.expression && node.expression.id) {
+            frontOfDot = node.expression.id;
+        }
+        if (node.name && node.name.id) {
+            endOfDot = node.name.id;
+        }
+        if (frontOfDot && endOfDot) {
+            // for members, when they hit this method
+            // allLocalObjects = this.buildLocalIdentifiers(linted.tree, {}, frontOfDot);
+
+            var obj;
+            var possibleProps = {};
+
+            // assume it's a local obj first
+            if (allLocalObjects[frontOfDot]) {
+                possibleProps = allLocalObjects
+            }
+            // only if not in node, try to get it as a built-in obj
+            if (typeof module === 'undefined' || typeof module.exports === 'undefined') {
+                obj = window[frontOfDot];
+                for (var prop in obj) {
+                    possibleProps[prop] = true;
+                }
+            }
+
+            var repl = javaScirpt.wordMatcher.findPotentialMatches(endOfDot, possibleProps);
+            repl = repl.sort(javaScirpt.parsingTools.lineSorter);
+
+            if (repl[0]) {
+                linted.lines[node.line] = this.replaceWord(linted.lines[node.line], node.name, endOfDot , repl[0]);
+                code = linted.lines.join("\n");
+            }
+            // FIXME: we need to track the offset for each line (annoying)
+        }
+    }
+    if (node.expression) {
+        return this.treeWalker(node.expression, code, linted, allLocalObjects);
+    }
+    return code;
+}
+ 
+javaScirpt.wordReplacer.memberFix.alternateSearch = function(linted, code) {
+
+    var allLocalObjects = this.buildLocalIdentifiers(linted.tree, {});
+
+    code = this.treeWalker(linted.tree, code, linted, allLocalObjects);
+
+    var retObj = {
+        madeAChange: false,
+        code: code
+    };
+
+    return retObj;
+}
