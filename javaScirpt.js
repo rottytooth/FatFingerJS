@@ -6687,6 +6687,9 @@ javaScirpt.wordReplacer.wordReplacerBase = {
         if (node.expression) {
             varlist = Object.assign({}, varlist, this.buildLocalIdentifiers(node.expression, varlist));
         }
+        if (node.label && node.label.id) {
+            varlist[node.label.id] = true;
+        }
         return varlist;
     }
 

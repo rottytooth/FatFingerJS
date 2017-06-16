@@ -12,8 +12,8 @@
             "description":  "function with parameter; function, var, the variable, and the parameter misspelled"
         },
         {
-            "original":     "var g = {};\n\ng.test = '';\n\nvar h = function(i) {\n\tvar m;\n\ti++;\n\tmm = ii;\n}\n\nfunction j(test1) {\n\tvar k = test2;\n\tkk++;\n}\n\nj(gg);\nh(ga);",
-            "transformed":  "var g = {};\n\ng.test = '';\n\nvar h = function(i) {\n\tvar m;\n\ti++;\n\tm = i;\n};\n\nfunction j(test1) {\n\tvar k = test1;\n\tk++;\n}\n\nj(g);\nh(g);",
+            "original":     "var g = {};\n\n\nvar h = function(i) {\n\tvar m;\n\ti++;\n\tmm = ii;\n}\n\nfunction j(test1) {\n\tvar k = test2;\n\tkk++;\n}\n\nj(gg);\nh(ga);",
+            "transformed":  "var g = {};\n\n\nvar h = function(i) {\n\tvar m;\n\ti++;\n\tm = i;\n};\n\nfunction j(test1) {\n\tvar k = test1;\n\tk++;\n}\n\nj(g);\nh(g);",
             "description":  "two types of functions; with params and local vars"
         },
         {
