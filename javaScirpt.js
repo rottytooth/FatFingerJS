@@ -6557,6 +6557,9 @@ javaScirpt.wordReplacer = {};
 // template design pattern
 javaScirpt.wordReplacer.wordReplacerBase = {
 
+    // options for jslint
+    lintOptions: {browser: true, multivar: true, for: true, this: true, white: true, devel: true, single: true},
+
     fixCode: function(code) {
 
         var idx = 0;
@@ -6576,6 +6579,9 @@ javaScirpt.wordReplacer.wordReplacerBase = {
         // whether we've altered the original code and need to reevaluate (re-lint) for a new set of warnings (and identifier locations)
         var madeAChange;
 
+        // the last changed node
+        var changedNode;
+
         // This outer loop is to "reset" jslint each time we make a change.
         // Not doing so leads to issues when we fix one warning which actually 
         // resolves multiple warnings (like fixing the word "function" that then satisfies
@@ -6583,7 +6589,7 @@ javaScirpt.wordReplacer.wordReplacerBase = {
         do {
 
             // setting jslint at pretty tolerant settings. We can just ignore warnings we don't like, but trying to stop jslint from tripping up on bs and not giving us a tree
-            var linted = jslint(code, {browser: true, multivar: true, for: true, this: true, white: true, devel: true, single: true});
+            var linted = jslint(code, this.lintOptions);
 
             if (this.canWeExit(linted)) {
                 return code;
@@ -6609,7 +6615,29 @@ javaScirpt.wordReplacer.wordReplacerBase = {
 
                     var results = this.correctText(linted, idx, code);
                     madeAChange = results.madeAChange;
+                    
+                    var oldcode = code;
                     code = results.code;
+
+                    if (madeAChange && results.changedNode) {
+                        // test result
+                        var newlint = jslint(code, this.lintOptions);
+                        var notfixed = false;
+                        for(var newIdx = 0; newIdx < newlint.warnings.length; newIdx++) {
+                            if (
+                                newlint.warnings[newIdx].column == results.changedNode.column &&
+                                newlint.warnings[newIdx].line == results.changedNode.line &&
+                                newlint.warnings[newIdx].code == results.changedNode.code) {
+                                    // we have not actually fixed the problem, as the same warning is in the new lint (same code, same starting place)
+                                    notfixed = true;
+                            }
+                        }
+                        if (notfixed) {
+                            code = oldcode;
+                            madeAChange = false;
+                            // let's just stick with what we had before and go to the next warning
+                        }
+                    }
                 }
             }
             numberOfLoops++;
@@ -6899,8 +6927,9 @@ javaScirpt.wordReplacer.badIdentifiers.correctText = function(relinted, idx, cod
             if (!sortedLines || sortedLines.length == 0) {
                 // we will do nothing in this case -- it means we did not find an identifier replacement that parses
             } else {
-                relinted.lines[relinted.warnings[idx].line] = sortedLines[0].line;
-                code = relinted.lines.join("\n");
+                var returnlines = relinted.lines.slice();
+                returnlines[relinted.warnings[idx].line] = sortedLines[0].line;
+                code = returnlines.join("\n");
                 madeAChange = true;
             }
         }
@@ -6908,6 +6937,7 @@ javaScirpt.wordReplacer.badIdentifiers.correctText = function(relinted, idx, cod
 
     var retObj = {
         madeAChange: madeAChange,
+        changedNode: relinted.warnings[idx],
         code: code
     };
 
