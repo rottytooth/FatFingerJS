@@ -2,7 +2,7 @@
 
 **Write JS with your fists!**
 
-Write JS in any old sloppy way and **JavaScirpt** (JAva-SERP't) will guess (sometimes well, sometimes very poorly) what it is you're trying to do. Why write clean JS when you can do this and it works?
+Write JS in any old sloppy way and **JavaScirpt** *(JAva-SERP't)* will guess (sometimes well, sometimes very poorly) what it is you're trying to do. Why write clean JS when you can do this and it works?
 
 ~~~
     <script type="text/javascript" src="javascirpt.js"></script>   

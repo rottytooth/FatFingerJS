@@ -1,5 +1,6 @@
 
-vart x = "Hullllo Werldd!"
+vart x = "herrrllo werld"
 
-dokkcccccccccccccumint.rit3(xx)
+dokkkkumint.rit3(xx)
+
 
