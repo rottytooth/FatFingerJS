@@ -30,7 +30,7 @@ javaScirpt.inlineScriptRunner =
         if (js_blocks.constructor === Array) {
             for (var idx = 0; idx < js_blocks.length; idx++) {
 
-                var result = javascirpt.run(js_blocks[idx]); 
+                var result = javaScirpt.run(js_blocks[idx]); 
 
                 if (result.succeeded) {
                     js += result.text;
