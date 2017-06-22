@@ -2,7 +2,7 @@
 
 **Write JS with your fists!**
 
-Write JS in any old sloppy way and **JavaScirpt** (*JA'va-SERP't*: named for the most common mispelling of JavaScript), you're trying to do. Why bother writing clean, well-formatted JS when you can do this?
+Write JS in any old sloppy way and **JavaScirpt** (*JA'va-SERP't*: named for the most common mispelling of JavaScript), will guess -- sometimes well, sometimes very poorly -- what it is you're trying to do. Why bother writing clean, well-formatted JS when you can do this?
 
 ~~~
     <script type="text/javascript" src="javascirpt.js"></script>   
