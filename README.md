@@ -14,9 +14,9 @@ Write JS in any old sloppy way and **JavaScirpt** *(JAva-SERP't)* will guess (so
     </script>
 ~~~
 
-Don't bother with semi-colons. Open brackets and never close them. Misspell keywords and variables, some method names as well. One thing to note: JavaScirpt has a poor concept of scope, so it you're doing fancy OO stuff, ask yourself: is there a good reason I haven't made everything global??? Also, you'll need to declare vars and functions (as if option explicit),so that JavaScirpt can tell your declarations from other statements.
+Don't bother with semi-colons. Open brackets and never close them. Misspell keywords and variables, some method names as well. One thing to note: JavaScirpt has a poor concept of scope, so it you're doing fancy OO stuff, ask yourself: is there a good reason I haven't made everything global??? Also, you'll need to declare vars and functions (as if option explicit), so that JavaScirpt can tell your declarations from other statements.
 
-To use, just include javascirpt.js in your project, include the library, add a script tag with some misspelling of JavaScript, and write your sloppy, shitty JS.
+To use, just include javascirpt.js in your project, add a script tag with some misspelling of JavaScript, and write your sloppy, shitty JS.
 
 *Project is still under construction / testing.*
 
