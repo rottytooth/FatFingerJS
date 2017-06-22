@@ -1,5 +1,11 @@
+<!DOCTYPE html>
 <html>
 <head>
+    <title>JavaScirpt</title>
+    <meta name="description" content="JavaScirpt allows JS to run even with typos; it is a tool and an associated coding style for JS">
+    <meta charset="utf-8" />
+    <meta property="og:image" content="" />
+    <meta name="viewport" content="width=device-width" />
     <script type="text/javascript" src="lib/jquery-3.2.0.js"></script>
     <script type="text/javascript" src="lib/jslint.js"></script>
     <script type="text/javascript" src="lib/parse-js.js"></script>
@@ -66,7 +72,7 @@
                 for(var j = 0; j < node.length; j++) {
                     printNode(node[j], indents + 1);
                 }
-            } 
+            }
             else {
                 for(var i = 0; i < indents; i++) {
                     $('#output').append('  ');
@@ -76,60 +82,154 @@
             }
         }
     </script>
-    <style type="text/css">
-    .boxy {
-        -moz-appearance: textfield-multiline;
-        -webkit-appearance: textarea;
-        border: 1px solid gray;
-        font: medium -moz-fixed;
-        font: -webkit-small-control;
-        overflow: auto;
-        padding: 0px;
-        resize: both;
-        width: 400px;
-        height: 400px;
-        margin: 0px;
-    }
-    .holder {
-        margin: 10px;
-        float: left;
-    }
-    h2 {
-        margin-left: 10px;
-    }
-    #treeHolder {
-        display: none;
-    }
+    <style>
+        body {
+            padding: 20px;
+        }
+        body, * {
+            font-family: Consolas,monaco,monospace;
+            font-size: 14px;
+            line-height: 1.4em;
+        }
+        .boxy {
+            -moz-appearance: textfield-multiline;
+            -webkit-appearance: textarea;
+            border: 1px solid gray;
+            font: medium -moz-fixed;
+            font: -webkit-small-control;
+            overflow: auto;
+            padding: 0px;
+            resize: both;
+            width: 400px;
+            height: 400px;
+            margin: 0px;
+        }
+        .holder {
+            margin: 10px;
+            float: left;
+        }
+        #treeHolder {
+            display: none;
+        }
+        #cbTree {
+            margin-top: 15px;
+        }
+        #cbTreeLabel {
+            margin-right: 60px;
+        }
+        h1 {
+            font-size: 2em;
+            font-weight: normal;
+        }
+        h2 {
+            margin-left: 10px;
+        }
+        #headerBreak {
+            margin-bottom: 60px;
+        }
+        h3 {
+            font-weight: bold;
+        }
+        p, li, textarea, .actions {
+            width: 100%;
+            max-width: 800px;
+        }
+        ul.pre li {
+            white-space: pre;
+        }
+        .checkbox {
+            display: inline-block;
+        }
+        .actions a {
+            float: right;
+        }
+        .actions {
+            clear: both;
+        }
+        .greyback {
+            background-color: #eeeeee;
+            width: 800px;
+        }
+        #testSection {
+            overflow: hidden;
+            zoom: 1;
+            background-color: #eeeeee;
+        }
+        #outbox, .boxy {
+            background-color: #ffffff;
+        }
+        p {
+            margin-top: 20px;
+            line-height: 180%;
+        }
     </style>
-    <title>JavaScirpt</title>
 </head>
 <body>
-    <h2>Test your JavaScirpt code</h2>
-    <div class="holder">
-        <b>INPUT (JavaScirpt)</b><br><br>
-        <textarea id="jstext" class="boxy">
+    <h1>JavaScirpt</h1>
+
+    <h2><a href="http://danieltemkin.com">Daniel Temkin</a>, 2017</h2>
+    <h2><a href="https://github.com/rottytooth/JavaScirpt">on GitHub here</a></h2>
+
+    <br id="headerBreak"/>
+
+    <p>
+        Write JS in any old sloppy way and <b><a href="https://github.com/rottytooth/JavaScirpt">JavaScirpt</a></b> <i>(JAva-SERP't)</i> will guess (sometimes well, sometimes very poorly) what it is you're trying to do. Why write clean JS when you can do this and it works?
+    </p>
+    <pre class="greyback">
+
+        &lt;script type="text/javascript" src="javascirpt.js">&lt;/script>
+        &lt;script type="text/javoscript">
+            // any misspelling of javascript works in the type attribute above
+
+            vart x = "herrrllo werld"
+
+            dokkkkumint.rit3(xx)
+
+        &lt;/script>
+    </pre>
+
+    <p>Don't bother with semi-colons. Open brackets and never close them. Misspell keywords and variables, some method names as well. One thing to note: JavaScirpt has a poor concept of scope, so it you're doing fancy OO stuff, ask yourself: is there a good reason I haven't made everything global??? Also, you'll need to declare vars and functions (as if option explicit),so that JavaScirpt can tell your declarations from other statements.</p>
+
+    <p>To use, just include javascirpt.js in your project, include the library, add a script tag with some misspelling of JavaScript, and write your sloppy, shitty JS.<p>
+
+    <p><b>Test out your code:</b></p>    
+
+    <div id="testSection">
+        <div class="holder">
+            <b>INPUT (JavaScirpt)</b><br><br>
+            <textarea id="jstext" class="boxy">
 vart x = "Hullllo Werldd!"
 
-dokkcccccccccccccumint.rit3(xx)            
-        </textarea>
-        <br />
-        <input type="button" value="Submit" id="btnSubmit" />
-        <input type="checkbox" value="tree" id="cbTree" /><label for="cbTree">Draw Syntax Tree</label>
-        <br />
-        <div id="errors" style="color: #aa0000;"></div>
-        <br/>
-    </div>
-    <div class="holder">
-        <b>OUTPUT (conventional JavaScript)</b><br><br>
-        <div id="outbox" class="boxy">
-            <pre><code id="newprogram"></code></pre>
+dokkcccccccccccccumint.rit3(xx)
+            </textarea>
+            <br />
+            <input type="checkbox" value="tree" id="cbTree" /><label for="cbTree" id="cbTreeLabel">Draw Syntax Tree</label>
+            <input type="button" value="Submit" id="btnSubmit" />
+            <br />
+            <div id="errors" style="color: #aa0000;"></div>
+            <br />
+        </div>
+        <div class="holder">
+            <b>OUTPUT (conventional JavaScript)</b><br><br>
+            <div id="outbox" class="boxy">
+                <pre><code id="newprogram"></code></pre>
+            </div>
+        </div>
+        <div class="holder" id="treeHolder">
+            <b>SYNTAX TREE</b><br /><br />
+            <div class="boxy">
+                <pre><code id="output" style="width: 100%;"></code></pre>
+            </div>
         </div>
     </div>
-    <div class="holder" id="treeHolder">
-        <b>SYNTAX TREE</b><br/><br/>
-        <div class="boxy">
-            <pre><code id="output" style="width: 100%;"></code></pre>
-        </div>
-    </div>
+    <br clear="all"/>
+    
+    <h3>Inspirations</h3>
+
+    <ul>
+        <li><a href="jsfuck.com">JSFuck</a></li>
+        <li><a href="https://github.com/reinderien/mimic">Mimic</a></li>
+        <li><a href="https://www.w3schools.com/Js/">The JavaScript language definition</a></li>
+    </ul>
 </body>
 </html>
