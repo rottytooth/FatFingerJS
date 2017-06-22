@@ -20,7 +20,7 @@ To use, just include javascirpt.js in your project, add a script tag with some m
 
 *Project is still under construction / testing.*
 
-**To contribute:**
+**Set-up if you'd like to contribute:**
 
 ~~~
 npm install -g grunt-cli
@@ -44,3 +44,5 @@ To run the tests:
 ~~~
 grunt nodeunit
 ~~~
+
+Number of times I misspelled *JavaScirpt* as *JavaScript* while creating this: **6**
