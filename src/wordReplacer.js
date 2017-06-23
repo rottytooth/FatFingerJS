@@ -45,6 +45,16 @@ javaScirpt.wordReplacer.wordReplacerBase = {
                 return code;
             }
 
+            if (!linted.ok && !linted.tree) {
+                if (linted.warnings && linted.warnings.length > 0) {
+                    throw new javaScirpt.CompileException("Error on line: " + 
+                        linted.warnings[linted.warnings.length - 1].line + 
+                        ", col: " + 
+                        linted.warnings[linted.warnings.length - 1].column);
+                }
+            }
+
+
             madeAChange = false; // reset
 
             topIndex = linted.warnings.length;
