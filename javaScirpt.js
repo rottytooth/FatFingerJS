@@ -33,6 +33,10 @@ http://danieltemkin.com
 
 var javaScirpt = {};
 
+javaScirpt.CompileException = function(message) {
+   this.message = message;
+};
+
 ;// jslint.js
 // 2017-04-10
 // Copyright (c) 2015 Douglas Crockford  (www.JSLint.com)
@@ -6573,9 +6577,6 @@ javaScirpt.wordReplacer.wordReplacerBase = {
         // number of times we can loop before it seems like we've exhausted the possibilities and are likely in an infinite loop
         var maxLoops; // this will be set at the first lint
 
-        // whether maxLoops has been set yet
-        var maxLoopSet = false;
-
         // whether we've altered the original code and need to reevaluate (re-lint) for a new set of warnings (and identifier locations)
         var madeAChange;
 
@@ -6588,6 +6589,9 @@ javaScirpt.wordReplacer.wordReplacerBase = {
         // away the warning about a bracket instead of semicolon, which we would NOT want to fix
         do {
 
+            // reset jslint; sometimes it hangs onto previous tree if page hasn't been reloaded
+            var clear = jslint("");
+
             // setting jslint at pretty tolerant settings. We can just ignore warnings we don't like, but trying to stop jslint from tripping up on bs and not giving us a tree
             var linted = jslint(code, this.lintOptions);
 
@@ -6595,13 +6599,23 @@ javaScirpt.wordReplacer.wordReplacerBase = {
                 return code;
             }
 
+            if (!linted.ok && !linted.tree) {
+                if (linted.warnings && linted.warnings.length > 0) {
+                    throw new javaScirpt.CompileException("Error on line: " + 
+                        linted.warnings[linted.warnings.length - 1].line + 
+                        ", col: " + 
+                        linted.warnings[linted.warnings.length - 1].column);
+                }
+            }
+
+
             madeAChange = false; // reset
 
             topIndex = linted.warnings.length;
 
-            if (!maxLoopSet) {
-                // this assumes that the first lint gives us more warnings than we will get on subsequent ones. Might be worth re-testing and increasing if not
-                maxLoops = (topIndex * (topIndex + 1)) / 2;
+            var tempMax = (topIndex * (topIndex + 1)) / 2;
+            if (!maxLoops || tempMax > maxLoops) {
+                maxLoops = tempMax;
             }
 
             // get to the real business
@@ -6911,9 +6925,14 @@ javaScirpt.wordReplacer.badIdentifiers.correctText = function(relinted, idx, cod
         var idList = javaScirpt.wordMatcher.findPotentialMatches(badIdent, identifiers);
 
         if (idList != null && idList.length > 0) {
-            var lineToFix = relinted.lines[relinted.warnings[idx].line];
+            var lineToFix = relinted.lines[relinted.warnings[idx].line].trimRight();
 
             var possibleLines = [];
+
+            var addAndRemoveBrackets = (lineToFix[lineToFix.length - 1] == "{");
+            if (addAndRemoveBrackets) {
+                lineToFix += "}";
+            }
 
             for(var j = 0; j < idList.length; j++) {
                 var newline = this.replaceWord(lineToFix, relinted.warnings[idx], relinted.warnings[idx].a, idList[j])
@@ -6928,7 +6947,12 @@ javaScirpt.wordReplacer.badIdentifiers.correctText = function(relinted, idx, cod
                 // we will do nothing in this case -- it means we did not find an identifier replacement that parses
             } else {
                 var returnlines = relinted.lines.slice();
-                returnlines[relinted.warnings[idx].line] = sortedLines[0].line;
+
+                var lineToAdd = sortedLines[0].line;
+                if (addAndRemoveBrackets) {
+                    lineToAdd = lineToAdd.substr(0, lineToAdd.length - 1);
+                }
+                returnlines[relinted.warnings[idx].line] = lineToAdd;
                 code = returnlines.join("\n");
                 madeAChange = true;
             }
@@ -7033,69 +7057,83 @@ javaScirpt.wordReplacer.memberFix.alternateSearch = function(linted, code) {
 
 javaScirpt.run = function(code) {
 
-    code = addBracketsToEnd(code);
+    try 
+    {
+        code = addBracketsToEnd(code);
 
-    code = cleanUpForVars(code);
+        code = cleanUpForVars(code);
 
-    // if it doesn't parse, fix that first
-    code = javaScirpt.wordReplacer.parseLevel.fixCode(code);
+        // if it doesn't parse, fix that first
+        code = javaScirpt.wordReplacer.parseLevel.fixCode(code);
 
-    if (code == null) {
-        var retObj = {
-            succeeded: false,
-            text: code
+        if (code == null) {
+            var retObj = {
+                succeeded: false
+            };
+            return retObj;
+        }
+        
+        // look for variables and objects we don't recognize
+        code = javaScirpt.wordReplacer.badIdentifiers.fixCode(code);
+
+        // if there are obj members we don't recognize, see if we can guess what they should be
+        code = javaScirpt.wordReplacer.memberFix.fixCode(code);
+    }
+    catch(e) {
+        var retObj;
+        if (e instanceof javaScirpt.CompileException) {
+            retObj = {
+                succeeded: false,
+                text: e.message
+            };
+        };
+        retObj = {
+            succeeded: false
         };
         return retObj;
     }
 
-    // look for variables and objects we don't recognize
-    code = javaScirpt.wordReplacer.badIdentifiers.fixCode(code);
 
-    // if there are obj members we don't recognize, see if we can guess what they should be
-    code = javaScirpt.wordReplacer.memberFix.fixCode(code);
-
-    // we consider that is succeeded if it parses
     var retObj = {
         succeeded: true,
         text: code
     };
     return retObj;
+}
 
 
+// additional private functions
+function addBracketsToEnd(code) {
+    var bracketCount = 0;
 
-    // additional private functions
-    function addBracketsToEnd(code) {
-        var bracketCount = 0;
+    var opens = (code.match(/{/g) || []).length;
+    var closes = (code.match(/}/g) || []).length;
 
-        var opens = (code.match(/{/g) || []).length;
-        var closes = (code.match(/}/g) || []).length;
+    for (var idx = 0; idx < opens - closes; idx++) {
+        code += "\n}";            
+    }
+    return code;
+}
 
-        for (var idx = 0; idx < opens - closes; idx++) {
-            code += "\n}";            
-        }
-        return code;
+// Usually jslint errors can be ignored, but it sure throws a fucking fit over using for(var ... 
+// to the point that it prevents jslint from finishing and giving me a tree
+function cleanUpForVars(code) {
+    var forex = /for\s*\(\s*var/;
+
+    while ((match = forex.exec(code)) != null) {
+        console.log("match found at " + match.index);
+
+        var varstmt = /(var\s+[^;]*)\s*;/.exec(code.substring(match.index, code.length));
+        var remain = /var\s+([^;]*)\s*;/.exec(code.substring(match.index, code.length));
+
+        code = code.substring(0, match.index) + 
+            varstmt[0] + 
+            "\nfor(" + 
+            code.substring(match.index + remain.index + 3, code.length); // the 3 is for the length of "var" -- we already swallowed any leading whitespace
+
     }
 
-    // Usually jslint errors can be ignored, but it sure throws a fucking fit over using for(var ... 
-    // to the point that it prevents jslint from finishing and giving me a tree
-    function cleanUpForVars(code) {
-        var forex = /for\s*\(\s*var/;
-
-        while ((match = forex.exec(code)) != null) {
-            console.log("match found at " + match.index);
-
-            var varstmt = /(var\s+[^;]*)\s*;/.exec(code.substring(match.index, code.length));
-            var remain = /var\s+([^;]*)\s*;/.exec(code.substring(match.index, code.length));
-
-            code = code.substring(0, match.index) + 
-                varstmt[0] + 
-                "\nfor(" + 
-                code.substring(match.index + remain.index + 3, code.length); // the 3 is for the length of "var" -- we already swallowed any leading whitespace
-
-        }
-
-        return code;
-    }
+    return code;
 }
 
 

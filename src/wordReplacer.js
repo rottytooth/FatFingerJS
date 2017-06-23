@@ -23,9 +23,6 @@ javaScirpt.wordReplacer.wordReplacerBase = {
         // number of times we can loop before it seems like we've exhausted the possibilities and are likely in an infinite loop
         var maxLoops; // this will be set at the first lint
 
-        // whether maxLoops has been set yet
-        var maxLoopSet = false;
-
         // whether we've altered the original code and need to reevaluate (re-lint) for a new set of warnings (and identifier locations)
         var madeAChange;
 
@@ -62,9 +59,9 @@ javaScirpt.wordReplacer.wordReplacerBase = {
 
             topIndex = linted.warnings.length;
 
-            if (!maxLoopSet) {
-                // this assumes that the first lint gives us more warnings than we will get on subsequent ones. Might be worth re-testing and increasing if not
-                maxLoops = (topIndex * (topIndex + 1)) / 2;
+            var tempMax = (topIndex * (topIndex + 1)) / 2;
+            if (!maxLoops || tempMax > maxLoops) {
+                maxLoops = tempMax;
             }
 
             // get to the real business
@@ -374,9 +371,14 @@ javaScirpt.wordReplacer.badIdentifiers.correctText = function(relinted, idx, cod
         var idList = javaScirpt.wordMatcher.findPotentialMatches(badIdent, identifiers);
 
         if (idList != null && idList.length > 0) {
-            var lineToFix = relinted.lines[relinted.warnings[idx].line];
+            var lineToFix = relinted.lines[relinted.warnings[idx].line].trimRight();
 
             var possibleLines = [];
+
+            var addAndRemoveBrackets = (lineToFix[lineToFix.length - 1] == "{");
+            if (addAndRemoveBrackets) {
+                lineToFix += "}";
+            }
 
             for(var j = 0; j < idList.length; j++) {
                 var newline = this.replaceWord(lineToFix, relinted.warnings[idx], relinted.warnings[idx].a, idList[j])
@@ -391,7 +393,12 @@ javaScirpt.wordReplacer.badIdentifiers.correctText = function(relinted, idx, cod
                 // we will do nothing in this case -- it means we did not find an identifier replacement that parses
             } else {
                 var returnlines = relinted.lines.slice();
-                returnlines[relinted.warnings[idx].line] = sortedLines[0].line;
+
+                var lineToAdd = sortedLines[0].line;
+                if (addAndRemoveBrackets) {
+                    lineToAdd = lineToAdd.substr(0, lineToAdd.length - 1);
+                }
+                returnlines[relinted.warnings[idx].line] = lineToAdd;
                 code = returnlines.join("\n");
                 madeAChange = true;
             }

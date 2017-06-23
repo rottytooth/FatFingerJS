@@ -36,3 +36,4 @@ var javaScirpt = {};
 javaScirpt.CompileException = function(message) {
    this.message = message;
 };
+

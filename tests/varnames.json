@@ -10,6 +10,11 @@
             "original":     "var myObj = {\n\taThing: 1\n};\n\nmttObj.murbthng = 0;",
             "transformed":  "var myObj = {\n\taThing: 1\n};\n\nmyObj.aThing = 0;",
             "description":  "obj with var"
+        },
+        {
+            "original":     "var test = function(code) {\nif (t == 5)\n{\ntest('hello');\n}\ntry {\n\tvar t= test(t);}\ncatch(err)\n{\n\treturn false;\n}\nreturn true;\n};\n\nif (tert) g++;",
+            "transformed":  "var test = function(code) {\nif (t == 5)\n{\ntest('hello');\n}\ntry {\n\tvar t= test(t);}\ncatch(err)\n{\n\treturn false;\n}\nreturn true;\n};\n\nif (test)  {\ng++;\n}",
+            "description":  "over (old) max # of cycles in fixIdentifiers"
         }
     ]
 }

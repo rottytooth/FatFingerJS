@@ -20,6 +20,12 @@
             "original":     "var t = {\n\ttest: function() {}\n}\n\nur.terst()",
             "transformed":  "var t = {\n\ttest: function() {}\n};\n\nt.test();",
             "description":  "function containing function"
+        },
+        {
+            "original":     "var t;\nwhile (tt) {\n\tt++;\n}",
+            "transformed":  "var t;\nwhile (t) {\n\tt++;\n}",
+            "description":  "expression in while loop as variable name"
         }
+
     ]
 }
