@@ -38,6 +38,9 @@ javaScirpt.wordReplacer.wordReplacerBase = {
         // away the warning about a bracket instead of semicolon, which we would NOT want to fix
         do {
 
+            // reset jslint; sometimes it hangs onto previous tree if page hasn't been reloaded
+            var clear = jslint("");
+
             // setting jslint at pretty tolerant settings. We can just ignore warnings we don't like, but trying to stop jslint from tripping up on bs and not giving us a tree
             var linted = jslint(code, this.lintOptions);
 
