@@ -6,7 +6,6 @@
     <meta charset="utf-8" />
     <meta property="og:image" content="" />
     <meta name="viewport" content="width=device-width" />
-    <script type="text/javascript" src="lib/jquery-3.2.0.js"></script>
     <script type="text/javascript" src="lib/jslint.js"></script>
     <script type="text/javascript" src="lib/parse-js.js"></script>
     <script type="text/javascript" src="src/bigHeader.js"></script>
@@ -16,53 +15,62 @@
     <script type="text/javascript" src="src/javascirpt-main.js"></script>
     <script type="text/javascript">
 
-        $(document).ready(function() {
-            $('#btnSubmit').click(function() {
-                $('#errors').text('');
-                $('#output').text('');
-                $('#newprogram').text('');
+        document.addEventListener("DOMContentLoaded", function () {
 
-                var code = $('#jstext').val();
+            var cbTree = document.getElementById('cbTree');
+            var treeHolder = document.getElementById('treeHolder');
+            cbTree.addEventListener('change', function (e) {
+                if (cbTree.checked) {
+                    treeHolder.style.display = 'block';
+                } else {
+                    treeHolder.style.display = 'none';
+                }
+            });
+
+            var jstext = document.getElementById('jstext');
+            jstext.addEventListener('keydown', function(e) {
+                var keyCode = e.keyCode || e.which;
+
+                if (keyCode == 9) {
+                    e.preventDefault();
+                    var start = e.target.selectionStart;
+                    var end = e.target.selectionEnd;
+
+                    // set textarea value to: text before caret + tab + text after caret
+                    e.target.value = (e.target.value.substring(0, start)
+                                + "\t"
+                                + e.target.value.substring(end));
+
+                    // put caret at right position again
+                    e.target.selectionStart =
+                    e.target.selectionEnd = start + 1;
+                }
+            });
+
+            var btnSubmit = document.getElementById('btnSubmit');
+            btnSubmit.addEventListener('click', function(e) {
+                var errors = document.getElementById('errors');
+                var output = document.getElementById('output');
+                var newprogram = document.getElementById('newprogram');
+                var jstext = document.getElementById('jstext');
+
+                errors.textContent = '';
+                output.textContent = '';
+                newprogram.textContent = '';
+
+                var code = jstext.value;
 
                 var result = javaScirpt.run(code);
                 if (result.succeeded) {
-                    $('#newprogram').text(result.text);
+                    newprogram.textContent = result.text;
                     ast = parse(result.text);
                     printNode(ast, 0);
                 }
                 else {
-                    $('#errors').text(result.text);
+                    errors.textContent = result.text;
                 }
             });
-        });
 
-        $(document).delegate('#jstext', 'keydown', function(e) {
-            var keyCode = e.keyCode || e.which;
-
-            if (keyCode == 9) {
-                e.preventDefault();
-                var start = $(this).get(0).selectionStart;
-                var end = $(this).get(0).selectionEnd;
-
-                // set textarea value to: text before caret + tab + text after caret
-                $(this).val($(this).val().substring(0, start)
-                            + "\t"
-                            + $(this).val().substring(end));
-
-                // put caret at right position again
-                $(this).get(0).selectionStart =
-                $(this).get(0).selectionEnd = start + 1;
-            }
-        });
-
-        $(document).ready(function () {
-            $('#cbTree').change(function () {
-                if ($('#cbTree').is(':checked')) {
-                    $('#treeHolder').show();
-                } else {
-                    $('#treeHolder').hide();
-                }
-            });
         });
 
         // print the whole tree, node by node
@@ -74,11 +82,12 @@
                 }
             }
             else {
+                var output = document.getElementById('output');
                 for(var i = 0; i < indents; i++) {
-                    $('#output').append('  ');
+                    output.innerHTML += '  ';
                 }
-                $('#output').append(node);
-                $('#output').append("<br/>");
+                output.innerHTML += node;
+                output.innerHTML += "<br/>";
             }
         }
     </script>
@@ -180,6 +189,10 @@
         p {
             margin-top: 20px;
             line-height: 180%;
+        }
+        textarea {
+            font: medium -moz-fixed;
+            font: -webkit-small-control;
         }
     </style>
 </head>
