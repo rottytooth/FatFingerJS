@@ -1,8 +1,8 @@
 
-javaScirpt.inlineScriptRunner =
+fatfinger.inlineScriptRunner =
 (function() {
 
-    function findJavaScirptBlocks() {
+    function findFatFingerBlocks() {
         var matchingElements = [];
         var allElements = document.getElementsByTagName('script');
         var good_re = /text\/j*/i
@@ -23,14 +23,14 @@ javaScirpt.inlineScriptRunner =
 
     function run() {
                 
-        var js_blocks = findJavaScirptBlocks();
+        var js_blocks = findFatFingerBlocks();
 
         var js = "";
 
         if (js_blocks.constructor === Array) {
             for (var idx = 0; idx < js_blocks.length; idx++) {
 
-                var result = javaScirpt.run(js_blocks[idx]); 
+                var result = fatfinger.run(js_blocks[idx]); 
 
                 if (result.succeeded) {
                     js += result.text;
@@ -42,8 +42,8 @@ javaScirpt.inlineScriptRunner =
     }
     
     return {"run" : run};
-})(javaScirpt);
+})(fatfinger);
 
 // if we're in a browser, activate the script runner
 if (typeof document !== 'undefined')
-    document.addEventListener('DOMContentLoaded', javaScirpt.inlineScriptRunner.run, false);
+    document.addEventListener('DOMContentLoaded', fatfinger.inlineScriptRunner.run, false);

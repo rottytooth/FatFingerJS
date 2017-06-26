@@ -1,11 +1,11 @@
-# JavaScirpt
+# FatFinger
 
-**Write JS with your fists!**
-
-Write JS in any old sloppy way and **JavaScirpt** (*JA'va-SERP't*: named for the most common misspelling of JavaScript), will guess -- sometimes well, sometimes very poorly -- what it is you're trying to do. Why bother writing clean, well-formatted JS when you can do this?
+**FatFinger** is a JavaScript library expanding JS to allow typos and
+misspellings as valid code. Why bother with clean, well-formatted JS when you 
+can write this and FatFinger will guess at your intentions?
 
 ~~~
-    <script type="text/javascript" src="javascirpt.js"></script>   
+    <script type="text/javascript" src="FatFingerJS.js"></script>   
     <script type="text/javoscript"><!-- any misspelling of javascript works here -->
         // here is my inline javascirrrrpt!
         vart x = "herrrllo werld"
@@ -14,13 +14,17 @@ Write JS in any old sloppy way and **JavaScirpt** (*JA'va-SERP't*: named for the
     </script>
 ~~~
 
-Don't bother with semi-colons. Open brackets and never close them. Misspell keywords, variables, and method names.
+Don't bother with semi-colons. Open brackets and never close them. Misspell keywords, variables, and functions.
 
-To use, just include javascirpt.js in your project, add a script tag with any misspelling of JavaScript, and write your sloppy, shitty JS.
+**Why?**
+* Neutralize the autocorrect mentality
+* Question [forty-five years of advice](https://www.cs.utexas.edu/~EWD/transcriptions/EWD03xx/EWD340.html) against expressiveness in the text of code
+* Play against the [compulsiveness of programming](https://www.sac.edu/AcademicProgs/Business/ComputerScience/Pages/Hester_James/HACKER.htm)
+* Embrace the chaos of JavaScript
 
-A couple of usage notes: You'll need to declare vars as if option explicit, so that JavaScirpt can fix typos that might otherwise look like new declarations. Also, JavaScirpt has a poor concept of scope, so it you're doing fancy OO stuff, ask yourself: is there a good reason I haven't made everything global???
+**How to use**
 
-*Project is still under construction / testing.*
+Include fatfinger.js in your project, add a script tag with any misspelling of JavaScript containing your FatFingered code. You'll need to declare all your vars as if option explicit; FatFinger assumes implicit declarations are actually misspelled statements. FatFinger has a poor concept of scope, so it you're doing fancy OO stuff, ask yourself: is there a good reason I haven't made everything global??? If not, this might not be the right library / coding style for you.
 
 **Set-up if you'd like to contribute:**
 
@@ -37,7 +41,7 @@ npm install grunt-contrib-concat --save-dev
 ~~~
 
 
-To update javascirpt.js:
+To update fatfinger.js:
 ~~~
 grunt concat
 ~~~
@@ -46,5 +50,3 @@ To run the tests:
 ~~~
 grunt nodeunit
 ~~~
-
-Number of times I misspelled *JavaScirpt* as *JavaScript* while creating this: **6**

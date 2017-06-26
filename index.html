@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>JavaScirpt</title>
-    <meta name="description" content="JavaScirpt allows JS to run even with typos; it is a tool and an associated coding style for JS">
+    <title>FatFingerJS</title>
+    <meta name="description" content="FatFinger allows JS to run even with typos; it is a tool and an associated coding style for JS">
     <meta charset="utf-8" />
     <meta property="og:image" content="" />
     <meta name="viewport" content="width=device-width" />
@@ -12,7 +12,7 @@
     <script type="text/javascript" src="src/parsingTools.js"></script>
     <script type="text/javascript" src="src/wordMatcher.js"></script>
     <script type="text/javascript" src="src/wordReplacer.js"></script>
-    <script type="text/javascript" src="src/javascirpt-main.js"></script>
+    <script type="text/javascript" src="src/fatfinger-main.js"></script>
     <script type="text/javascript">
 
         document.addEventListener("DOMContentLoaded", function () {
@@ -60,7 +60,7 @@
 
                 var code = jstext.value;
 
-                var result = javaScirpt.run(code);
+                var result = fatfinger.run(code);
                 if (result.succeeded) {
                     newprogram.textContent = result.text;
                     ast = parse(result.text);
@@ -94,6 +94,7 @@
     <style>
         body {
             padding: 20px;
+            margin-bottom: 70px;
         }
 
         body, * {
@@ -101,7 +102,11 @@
             font-size: 14px;
             line-height: 1.4em;
         }
-
+        textarea {
+            font: 'Courier', monospace; 
+            padding-top: 15px !important;
+            height: 385px !important;
+        }
         .boxy {
             -moz-appearance: textfield-multiline;
             -webkit-appearance: textarea;
@@ -174,6 +179,7 @@
         .greyback {
             background-color: #eeeeee;
             width: 800px;
+            line-height: 200%;
         }
 
         #testSection {
@@ -188,29 +194,30 @@
 
         p {
             margin-top: 20px;
-            line-height: 180%;
         }
-        textarea {
-            font: medium -moz-fixed;
-            font: -webkit-small-control;
+        p, li {
+            line-height: 180%;
         }
     </style>
 </head>
 <body>
-    <h1>JavaScirpt</h1>
+    <h1>FatFinger.JS</h1>
 
     <h2><a href="http://danieltemkin.com">Daniel Temkin</a>, 2017</h2>
-    <h2><a href="https://github.com/rottytooth/JavaScirpt">on GitHub</a></h2>
+    <h2><a href="https://github.com/rottytooth/FatFingerJS">on GitHub</a></h2>
 
     <br id="headerBreak" />
 
     <p>
-        Write JS in any old sloppy way and <b><a href="https://github.com/rottytooth/JavaScirpt">JavaScirpt</a></b> (<i>JA'va-SERP't</i>: named for the most common misspelling of JavaScript), 
-        will guess -- sometimes well, sometimes very poorly -- what it is you're trying to do. Why bother writing clean, well-formatted JS when you can do this?
+        FatFinger is a JavaScript library expanding JS to allow typos and
+        misspellings as valid code. Why bother with clean, well-formatted JS when you 
+        can write this and FatFinger will guess at your intentions?
     </p>
+
+
     <pre class="greyback">
 
-        &lt;script type="text/javascript" src="javascirpt.js">&lt;/script>
+        &lt;script type="text/javascript" src="fatfinger.js">&lt;/script>
         &lt;script type="text/javoscript">
             // any misspelling of javascript works in the type attribute above
             vart x = "herrrllo werld"
@@ -218,15 +225,21 @@
         &lt;/script>
     </pre>
 
-    <p>Don't bother with semi-colons. Open brackets and never close them. Misspell keywords, variables, and method names.</p>
+    <p>Don't bother with semi-colons. Open brackets and never close them. Misspell keywords, variables, and functions.</p>
 
-    <p>To use, just include javascirpt.js in your project, add a script tag with any misspelling of JavaScript, and write your sloppy, shitty JS.<p>
+    <h3>Why?</h3>
+    <ul>
+        <li>Neutralize the autocorrect mentality</li>
+        <li>Question <a href="https://www.cs.utexas.edu/~EWD/transcriptions/EWD03xx/EWD340.html">forty-five years of advice</a> against expressiveness in the text of code</li>
+        <li>Play against the <a href="https://www.sac.edu/AcademicProgs/Business/ComputerScience/Pages/Hester_James/HACKER.htm">compulsiveness of programming</a></li>
+        <li>Embrace the chaos of JavaScript</li>
+    </ul>
 
     <p><b>Test out your code:</b></p>
 
     <div id="testSection">
         <div class="holder">
-            <b>INPUT (JavaScirpt)</b><br><br>
+            <b>INPUT (FatFinger-style JS)</b><br><br>
             <textarea id="jstext" class="boxy">
 vart x = "herrrllo werld"
 
@@ -254,14 +267,22 @@ dokkkkumint.rit3(xx)
     </div>
     <br clear="all" />
 
-    <p>A couple of usage notes: You'll need to declare vars as if option explicit, so that JavaScirpt can fix typos that might otherwise look like new declarations. Also, JavaScirpt has a poor concept of scope, so it you're doing fancy OO stuff, ask yourself: is there a good reason I haven't made everything global???</p>
+    <h3>How To Use</h3>
+    <p>Include fatfinger.js in your project, add a script tag with any misspelling of JavaScript 
+        containing your FatFingered code. You'll need to declare all your vars as if option
+        explicit; FatFinger
+        assumes implicit declarations are actually misspelled statements.
+        FatFinger 
+        has a poor concept of scope, so it you're doing fancy OO stuff, ask yourself: is there a good reason 
+        I haven't made everything global??? If not, this might not be the right library / coding style for you.
+        <p>
 
-    <h3>Inspirations</h3>
+    <h3>See Also</h3>
 
     <ul>
-        <li><a href="http://jsfuck.com">JSFuck</a></li>
+        <li><a href="https://github.com/mattdiamond/fuckitjs">FuckIt.JS</a></li>
         <li><a href="https://github.com/reinderien/mimic">Mimic</a></li>
-        <li><a href="https://www.w3schools.com/Js/">The JavaScript language definition</a></li>
+        <li><a href="http://jsfuck.com">JSFuck</a></li>
     </ul>
 
     <h3>Previous Languages</h3>
@@ -273,8 +294,6 @@ dokkkkumint.rit3(xx)
         <li><a href="http://esolangs.org/wiki/User:Rottytooth">and more...</a></li>
     </ul>
     <br/>
-    Number of times I misspelled <i>JavaScirpt</i> as <i>JavaScript</i> while creating this: <b>6</b><br>
-    <br/>
-    <a href="https://github.com/rottytooth/JavaScirpt">See more here</a>
+    <a href="https://github.com/rottytooth/FatFingerJS">See more here</a>
 </body>
 </html>

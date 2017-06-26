@@ -1,5 +1,5 @@
 
-javaScirpt.parsingTools = 
+fatfinger.parsingTools = 
 (function(){
 
         var testParseJs = function(code) {
@@ -43,7 +43,7 @@ javaScirpt.parsingTools =
             for(var locIdx = words.length - 1; locIdx >= 0; locIdx--) { // locIdx = location in the string (by word)
                 if (words[locIdx].type != "name") { continue; }
 
-                var wordReplaceList = javaScirpt.wordMatcher.findPotentialMatches(words[locIdx].value);
+                var wordReplaceList = fatfinger.wordMatcher.findPotentialMatches(words[locIdx].value);
 
                 for (var replaceIdx = 0; replaceIdx < wordReplaceList.length; replaceIdx++) // replaceIdx = which replacement word to use
                 {
@@ -73,4 +73,4 @@ javaScirpt.parsingTools =
             "lineSorter" : lineSorter,
             "correctLineForKeywords" : correctLineForKeywords
     };
-})(javaScirpt);
+})(fatfinger);

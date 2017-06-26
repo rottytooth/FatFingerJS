@@ -1,6 +1,6 @@
 'use strict';
 
-var javascirpt = require("../javaScirpt.js");
+var fatfinger = require("../fatfinger.js");
 var grunt = require('grunt');
 var path = require('path');
 var fs = require("fs");
@@ -11,7 +11,7 @@ var runTest = function(jsFile, test) {
   for(var i in jsonContent.tests) {
     var codeblock = jsonContent.tests[i];
     console.log("testing " + codeblock.description);
-    var results = javascirpt.run(codeblock.original);
+    var results = fatfinger.run(codeblock.original);
 
     // does it parse successfully
     test.equal(results.succeeded, true);

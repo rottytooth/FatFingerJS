@@ -1,6 +1,6 @@
 //require("../lib/parse-js.js");
 
-javaScirpt.wordMatcher = 
+fatfinger.wordMatcher = 
 (function() {
 
     function findPotentialMatches(orig, dictionary) {
@@ -73,4 +73,4 @@ PRIVATE FUNCTIONS
     }
 
     return {"findPotentialMatches" : findPotentialMatches};
-})(javaScirpt);
+})(fatfinger);

@@ -1,11 +1,7 @@
 /*
+FatFingerJS
 
-      () _   
-javasc[][|)pt
-
-Don't use j̶a̶v̶a̶s̶c̶r̶i̶p̶t̶ , use JAVASCIRRRRRRPT!!!
-
-https://github.com/rottytooth/JavaScirpt
+https://github.com/rottytooth/FatFingerJS
 http://esoteric.codes
 http://danieltemkin.com
 
@@ -13,27 +9,10 @@ http://danieltemkin.com
 */
 
 
-;
 
-    ;
+var fatfinger = {};
 
-
-            ;;  ;   ;           ;;; ;               ;   
-
-
-                ;   ;;      ;   ;       ;   ;       ;       ;
-
-                        ;               ;;      ;           ;           //;
-
-                                ;               ;               ;       ;   ;;      ;   ;;          ;
-
-                                /*;*/   ;   ;;  ;           /*;*/       ;       ;       ;;              ;
-
-
-
-var javaScirpt = {};
-
-javaScirpt.CompileException = function(message) {
+fatfinger.CompileException = function(message) {
    this.message = message;
 };
 

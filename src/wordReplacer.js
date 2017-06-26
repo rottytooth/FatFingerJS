@@ -2,10 +2,10 @@
 //require("../lib/jslint.js");
 //require("parsingTools.js");
 
-javaScirpt.wordReplacer = {};
+fatfinger.wordReplacer = {};
 
 // template design pattern
-javaScirpt.wordReplacer.wordReplacerBase = {
+fatfinger.wordReplacer.wordReplacerBase = {
 
     // options for jslint
     lintOptions: {browser: true, multivar: true, for: true, this: true, white: true, devel: true, single: true},
@@ -47,7 +47,7 @@ javaScirpt.wordReplacer.wordReplacerBase = {
 
             if (!linted.ok && !linted.tree) {
                 if (linted.warnings && linted.warnings.length > 0) {
-                    throw new javaScirpt.CompileException("Error on line: " + 
+                    throw new fatfinger.CompileException("Error on line: " + 
                         linted.warnings[linted.warnings.length - 1].line + 
                         ", col: " + 
                         linted.warnings[linted.warnings.length - 1].column);
@@ -147,7 +147,7 @@ javaScirpt.wordReplacer.wordReplacerBase = {
                 varlist[node.name] = true;
             }
 
-            // FIXME: For now, we're treating all parameters as if they are global, in fact JavaScirpt has no idea about scope
+            // FIXME: For now, we're treating all parameters as if they are global, in fact fatfinger has no idea about scope
             if (node.parameters) {
                 for(var k = 0; k < node.parameters.length; k++) {
                     varlist[node.parameters[k].id] = true;
@@ -183,7 +183,7 @@ javaScirpt.wordReplacer.wordReplacerBase = {
 
 }
 
-javaScirpt.wordReplacer.inherit = function(proto) {
+fatfinger.wordReplacer.inherit = function(proto) {
     var F = function() { };
     F.prototype = proto;
     return new F();
@@ -194,14 +194,14 @@ javaScirpt.wordReplacer.inherit = function(proto) {
 
 // PARSE LEVEL WORD REPLACER
 
-javaScirpt.wordReplacer.parseLevel = javaScirpt.wordReplacer.inherit(javaScirpt.wordReplacer.wordReplacerBase);
+fatfinger.wordReplacer.parseLevel = fatfinger.wordReplacer.inherit(fatfinger.wordReplacer.wordReplacerBase);
  
-javaScirpt.wordReplacer.parseLevel.canWeExit = function(linted) {
+fatfinger.wordReplacer.parseLevel.canWeExit = function(linted) {
     return linted.ok;
 }
 
  
-javaScirpt.wordReplacer.parseLevel.correctText = function(linted, idx, code) {
+fatfinger.wordReplacer.parseLevel.correctText = function(linted, idx, code) {
 
     var warning = linted.warnings[idx];
 
@@ -237,12 +237,12 @@ javaScirpt.wordReplacer.parseLevel.correctText = function(linted, idx, code) {
 
             // make sure it is actually failing to parse before we try to make it parse
             // the brute way (using the keyword type difference thing)
-            var doesparse = javaScirpt.parsingTools.testParseJs(currLine);         
+            var doesparse = fatfinger.parsingTools.testParseJs(currLine);         
 
             if (!doesparse) {
 
                 // FIXME: this will still fail if there are two misspelled keywords on a line
-                var newline = javaScirpt.parsingTools.correctLineForKeywords(currLine);
+                var newline = fatfinger.parsingTools.correctLineForKeywords(currLine);
                 if (newline != null) {
                     fixed = true;
 
@@ -258,7 +258,7 @@ javaScirpt.wordReplacer.parseLevel.correctText = function(linted, idx, code) {
 
         // oh god here's another stupid thing because it's fatal for jslint: add brackets around single statements
         if (warning.message.includes("Expected '{'") &&
-            javaScirpt.parsingTools.testParseJs(code)) { // we make sure it parses first bc this is not an error that should break parsing by a normal parsing engine like parse-js: let's make sure it's the thing it seems to be
+            fatfinger.parsingTools.testParseJs(code)) { // we make sure it parses first bc this is not an error that should break parsing by a normal parsing engine like parse-js: let's make sure it's the thing it seems to be
 
             // jslint warning won't tell us actual char location, so we have to find line this way
             var howManyNewlines = 0;
@@ -286,7 +286,7 @@ javaScirpt.wordReplacer.parseLevel.correctText = function(linted, idx, code) {
 
             newCode += code.substring(charidx, code.length);
 
-            if (javaScirpt.parsingTools.testParseJs(newCode)) {
+            if (fatfinger.parsingTools.testParseJs(newCode)) {
                 // make sure we didn't break the code
                 code = newCode;
                 fixed = true;
@@ -318,8 +318,8 @@ javaScirpt.wordReplacer.parseLevel.correctText = function(linted, idx, code) {
     return retObj;
 }
 
-javaScirpt.wordReplacer.parseLevel.test = function(code) {
-    return javaScirpt.parsingTools.testParseJs(code);
+fatfinger.wordReplacer.parseLevel.test = function(code) {
+    return fatfinger.parsingTools.testParseJs(code);
 };
 
 
@@ -327,15 +327,15 @@ javaScirpt.wordReplacer.parseLevel.test = function(code) {
 
 // BAD IDENTIFIERS WORD REPLACER
 
-javaScirpt.wordReplacer.badIdentifiers = javaScirpt.wordReplacer.inherit(javaScirpt.wordReplacer.wordReplacerBase);
+fatfinger.wordReplacer.badIdentifiers = fatfinger.wordReplacer.inherit(fatfinger.wordReplacer.wordReplacerBase);
 
 // preloading global stuff so we don't loop through it every time
-javaScirpt.wordReplacer.loadGlobals = function() {
+fatfinger.wordReplacer.loadGlobals = function() {
     globals = [];
     if (typeof module === 'undefined' || typeof module.exports === 'undefined') {
         // get what's in scope from the browser
         for (var k in window ) {
-            if (k != 'javaScirpt' && k!= 'jslint') { // don't add the framework
+            if (k != 'fatfinger' && k!= 'jslint') { // don't add the framework
                 globals[k] = true;
             }
         }
@@ -345,13 +345,13 @@ javaScirpt.wordReplacer.loadGlobals = function() {
     return globals;
 }
 
-javaScirpt.wordReplacer.badIdentifiers.global_obj = javaScirpt.wordReplacer.loadGlobals();
+fatfinger.wordReplacer.badIdentifiers.global_obj = fatfinger.wordReplacer.loadGlobals();
 
 
 // no early exit for bad identifiers
-javaScirpt.wordReplacer.badIdentifiers.canWeExit = function(linted) { return false; }
+fatfinger.wordReplacer.badIdentifiers.canWeExit = function(linted) { return false; }
 
-javaScirpt.wordReplacer.badIdentifiers.buildIdentifiers = function(relinted) {
+fatfinger.wordReplacer.badIdentifiers.buildIdentifiers = function(relinted) {
 
     var varlist = [];
 
@@ -360,7 +360,7 @@ javaScirpt.wordReplacer.badIdentifiers.buildIdentifiers = function(relinted) {
     return Object.assign({}, this.global_obj, varlist);
 }
 
-javaScirpt.wordReplacer.badIdentifiers.correctText = function(relinted, idx, code) {
+fatfinger.wordReplacer.badIdentifiers.correctText = function(relinted, idx, code) {
     madeAChange = false;
 
     var identifiers = this.buildIdentifiers(relinted);
@@ -368,7 +368,7 @@ javaScirpt.wordReplacer.badIdentifiers.correctText = function(relinted, idx, cod
     if (relinted.warnings[idx].code == "undeclared_a") {
         // here we will try swapping for each identifier
         var badIdent = relinted.warnings[idx].a;
-        var idList = javaScirpt.wordMatcher.findPotentialMatches(badIdent, identifiers);
+        var idList = fatfinger.wordMatcher.findPotentialMatches(badIdent, identifiers);
 
         if (idList != null && idList.length > 0) {
             var lineToFix = relinted.lines[relinted.warnings[idx].line].trimRight();
@@ -383,11 +383,11 @@ javaScirpt.wordReplacer.badIdentifiers.correctText = function(relinted, idx, cod
             for(var j = 0; j < idList.length; j++) {
                 var newline = this.replaceWord(lineToFix, relinted.warnings[idx], relinted.warnings[idx].a, idList[j])
 
-                if (javaScirpt.parsingTools.testParseJs(newline)) {
+                if (fatfinger.parsingTools.testParseJs(newline)) {
                     possibleLines.push({line:newline, score:idList[j].score, place:j});
                 }
             }
-            var sortedLines = possibleLines.sort(javaScirpt.parsingTools.lineSorter);
+            var sortedLines = possibleLines.sort(fatfinger.parsingTools.lineSorter);
 
             if (!sortedLines || sortedLines.length == 0) {
                 // we will do nothing in this case -- it means we did not find an identifier replacement that parses
@@ -416,25 +416,25 @@ javaScirpt.wordReplacer.badIdentifiers.correctText = function(relinted, idx, cod
 }
 
 // always return the code, no final test
-javaScirpt.wordReplacer.badIdentifiers.test = function(code) { return true; };
+fatfinger.wordReplacer.badIdentifiers.test = function(code) { return true; };
 
 
 
 // BAD IDENTIFIERS WORD REPLACER
 
-javaScirpt.wordReplacer.memberFix = javaScirpt.wordReplacer.inherit(javaScirpt.wordReplacer.wordReplacerBase);
+fatfinger.wordReplacer.memberFix = fatfinger.wordReplacer.inherit(fatfinger.wordReplacer.wordReplacerBase);
 
-javaScirpt.wordReplacer.memberFix.global_obj = javaScirpt.wordReplacer.loadGlobals();
+fatfinger.wordReplacer.memberFix.global_obj = fatfinger.wordReplacer.loadGlobals();
 
-javaScirpt.wordReplacer.memberFix.canWeExit = function(linted) { }
+fatfinger.wordReplacer.memberFix.canWeExit = function(linted) { }
 
-javaScirpt.wordReplacer.memberFix.test = function(code) { return true; };
+fatfinger.wordReplacer.memberFix.test = function(code) { return true; };
 
 // We are not dealing with the warnings this loop, but with the tree itself. We need to allow
 // for resetting the tree, since changing names will change string lengths and so locations
-javaScirpt.wordReplacer.memberFix.lastCheckedLocation = 0;
+fatfinger.wordReplacer.memberFix.lastCheckedLocation = 0;
 
-javaScirpt.wordReplacer.memberFix.treeWalker = function(node, code, linted, allLocalObjects) {
+fatfinger.wordReplacer.memberFix.treeWalker = function(node, code, linted, allLocalObjects) {
     if (Array.isArray(node)) {
         for (var i = 0; i < node.length; i++) {
             code = this.treeWalker(node[i], code, linted, allLocalObjects);
@@ -470,8 +470,8 @@ javaScirpt.wordReplacer.memberFix.treeWalker = function(node, code, linted, allL
                 }
             }
 
-            var repl = javaScirpt.wordMatcher.findPotentialMatches(endOfDot, possibleProps);
-            repl = repl.sort(javaScirpt.parsingTools.lineSorter);
+            var repl = fatfinger.wordMatcher.findPotentialMatches(endOfDot, possibleProps);
+            repl = repl.sort(fatfinger.parsingTools.lineSorter);
 
             if (repl[0]) {
                 linted.lines[node.line] = this.replaceWord(linted.lines[node.line], node.name, endOfDot , repl[0]);
@@ -486,7 +486,7 @@ javaScirpt.wordReplacer.memberFix.treeWalker = function(node, code, linted, allL
     return code;
 }
  
-javaScirpt.wordReplacer.memberFix.alternateSearch = function(linted, code) {
+fatfinger.wordReplacer.memberFix.alternateSearch = function(linted, code) {
 
     var allLocalObjects = this.buildLocalIdentifiers(linted.tree, {});
 

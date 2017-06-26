@@ -1,6 +1,6 @@
 
 
-javaScirpt.run = function(code) {
+fatfinger.run = function(code) {
 
     try 
     {
@@ -9,7 +9,7 @@ javaScirpt.run = function(code) {
         code = cleanUpForVars(code);
 
         // if it doesn't parse, fix that first
-        code = javaScirpt.wordReplacer.parseLevel.fixCode(code);
+        code = fatfinger.wordReplacer.parseLevel.fixCode(code);
 
         if (code == null) {
             var retObj = {
@@ -19,14 +19,14 @@ javaScirpt.run = function(code) {
         }
         
         // look for variables and objects we don't recognize
-        code = javaScirpt.wordReplacer.badIdentifiers.fixCode(code);
+        code = fatfinger.wordReplacer.badIdentifiers.fixCode(code);
 
         // if there are obj members we don't recognize, see if we can guess what they should be
-        code = javaScirpt.wordReplacer.memberFix.fixCode(code);
+        code = fatfinger.wordReplacer.memberFix.fixCode(code);
     }
     catch(e) {
         var retObj;
-        if (e instanceof javaScirpt.CompileException) {
+        if (e instanceof fatfinger.CompileException) {
             retObj = {
                 succeeded: false,
                 text: e.message
@@ -83,4 +83,4 @@ function cleanUpForVars(code) {
 
 
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined')
-    module.exports = javaScirpt;
+    module.exports = fatfinger;
