@@ -61,13 +61,21 @@
                 var code = jstext.value;
 
                 var result = fatfinger.run(code);
-                if (result.succeeded) {
+                if (result.text) {
                     newprogram.textContent = result.text;
-                    ast = parse(result.text);
-                    printNode(ast, 0);
+                    if (result.succeeded)
+                    {
+                        ast = parse(result.text);
+                        printNode(ast, 0);
+                    }
                 }
-                else {
-                    errors.textContent = result.text;
+                if (!result.succeeded)
+                {
+                    var errString = "Failed to Parse";
+                    if (result.error) {
+                        errString += "<br/><br/>" + result.error;
+                    }
+                    errors.textContent = errString;
                 }
             });
 
@@ -198,6 +206,9 @@
         p, li {
             line-height: 180%;
         }
+        #errors {
+            margin-left: 30px;
+        }
     </style>
 </head>
 <body>
@@ -248,7 +259,8 @@ dokkkkumint.rit3(xx)
             <br />
             <input type="checkbox" value="tree" id="cbTree" /><label for="cbTree" id="cbTreeLabel">Draw Syntax Tree</label>
             <input type="button" value="Submit" id="btnSubmit" />
-            <br />
+            <br /><br/>
+            <b>Errors:</b>
             <div id="errors" style="color: #aa0000;"></div>
             <br />
         </div>

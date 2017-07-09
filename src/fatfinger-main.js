@@ -8,12 +8,16 @@ fatfinger.run = function(code) {
 
         code = cleanUpForVars(code);
 
+        var prevCode = code;
+
         // if it doesn't parse, fix that first
         code = fatfinger.wordReplacer.parseLevel.fixCode(code);
 
         if (code == null) {
             var retObj = {
-                succeeded: false
+                succeeded: false,
+                error: code,
+                text: prevCode
             };
             return retObj;
         }

@@ -1,4 +1,4 @@
-# FatFinger
+# FatFingerJS
 
 **FatFinger** is a JavaScript library expanding JS to allow typos and
 misspellings as valid code. Why bother with clean, well-formatted JS when you 
