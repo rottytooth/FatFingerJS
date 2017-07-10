@@ -11,6 +11,10 @@ fatfinger.wordMatcher =
             // against keywords
             addToList(dict, orig, KEYWORDS);
             addToList(dict, orig, KEYWORDS_ATOM);
+
+            // missing objects from scope
+            dict["Math"] = true;
+
             //    addToList(dict, orig, OPERATORS);
             //    addToList(dict, orig, OPERATOR_CHARS);
         } else {
