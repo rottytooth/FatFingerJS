@@ -160,7 +160,7 @@ fatfinger.wordReplacer.wordReplacerBase = {
                 varlist = Object.assign({}, varlist, this.buildLocalIdentifiers(node[i], varlist));
             }
         }
-        if (node.block && node.block.id != "{") { // check for { to avoid infinite loop
+        if (node.block) { 
             varlist = Object.assign({}, varlist, this.buildLocalIdentifiers(node.block, varlist));
         }
 
@@ -482,6 +482,9 @@ fatfinger.wordReplacer.memberFix.treeWalker = function(node, code, linted, allLo
     }
     if (node.expression) {
         code = this.treeWalker(node.expression, code, linted, allLocalObjects);
+    }
+    if (node.else) {
+        code = this.treeWalker(node.else, code, linted, allLocalObjects);
     }
     if (node.block) {
         code = this.treeWalker(node.block, code, linted, allLocalObjects);

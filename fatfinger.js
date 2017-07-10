@@ -6693,7 +6693,7 @@ fatfinger.wordReplacer.wordReplacerBase = {
                 varlist = Object.assign({}, varlist, this.buildLocalIdentifiers(node[i], varlist));
             }
         }
-        if (node.block && node.block.id != "{") { // check for { to avoid infinite loop
+        if (node.block) { 
             varlist = Object.assign({}, varlist, this.buildLocalIdentifiers(node.block, varlist));
         }
 
