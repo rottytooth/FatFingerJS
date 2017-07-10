@@ -1,5 +1,5 @@
 var bottles;
-for (counter = 99; counter >= 1; counter = counter - 1) 
+for (var counter = 99; counter >= 1; counter = counter - 1) 
 {
     if (counter == 1) {
         botles = 'bottle';
@@ -11,7 +11,7 @@ for (counter = 99; counter >= 1; counter = counter - 1)
         conssole.lg("");
         consoles.logg(counter+" "+botttles+" o beer on the wall.");
     }
-    console.log(counter+" "+botles+" of beer.");
+    conable.log(counter+" "+botles+" of beer.");
     console.lo("Take one down.");
     console.log("Pass it arund.");
     ift (ount == 1) {

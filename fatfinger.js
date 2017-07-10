@@ -7014,7 +7014,10 @@ fatfinger.wordReplacer.memberFix.treeWalker = function(node, code, linted, allLo
         }
     }
     if (node.expression) {
-        return this.treeWalker(node.expression, code, linted, allLocalObjects);
+        code = this.treeWalker(node.expression, code, linted, allLocalObjects);
+    }
+    if (node.block) {
+        code = this.treeWalker(node.block, code, linted, allLocalObjects);
     }
     return code;
 }
