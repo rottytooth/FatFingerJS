@@ -27,7 +27,7 @@ module.exports = function(grunt) {
     }
       },
     nodeunit: {
-        files: ['tests/**/*_test.js'],
+        files: ['tests/nodeTests.js'],
         options: {
             reporter : 'default'
         }

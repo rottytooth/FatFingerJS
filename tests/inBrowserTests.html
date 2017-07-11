@@ -1,0 +1,23 @@
+<html>
+  <head>
+    <title>Example Test Suite</title>
+    <script src="nodeunit.js"></script>
+    <script type="text/javascript">
+        this.suite1 = {
+            'example test': function (test) {
+                test.ok(true, 'everything is ok');
+                test.done();
+            }
+        };
+    </script>
+  </head>
+  <body>
+    <h1 id="nodeunit-header">Test Suite</h1>
+    <script type="text/javascript">
+      nodeunit.run({
+        'Suite One': suite1
+      }, 
+      {/* options */});
+    </script>
+  </body>
+</html>
