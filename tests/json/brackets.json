@@ -3,7 +3,7 @@
     [
         {
             "original":     "var x;\n if (x == 0) { x++;",
-            "transformed":  "var x; if (x === 0) { x++; }",
+            "transformed":  "var x; if (x == 0) { x++; }",
             "description":  "single missing bracket"
         },
         {

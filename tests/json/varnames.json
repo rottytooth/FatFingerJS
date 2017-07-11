@@ -13,7 +13,7 @@
         },
         {
             "original":     "var test = function(code) {\nif (t == 5)\n{\ntest('hello');\n}\ntry {\n\tvar t= test(t);}\ncatch(err)\n{\n\treturn false;\n}\nreturn true;\n};\n\nif (tert) g++;",
-            "transformed":  "var test = function(code) {\nif (t == 5)\n{\ntest('hello');\n}\ntry {\n\tvar t= test(t);}\ncatch(err)\n{\n\treturn false;\n}\nreturn true;\n};\n\nif (test)  {\ng++;\n}",
+            "transformed":  "var test = function(code) {\nif (t == 5)\n{\ntest('hello');\n}\ntry {\n\tvar t= test(t);}\ncatch(err)\n{\n\treturn false;\n}\nreturn true;\n};\n\nif (test)g++;}",
             "description":  "over (old) max # of cycles in fixIdentifiers"
         }
     ]

@@ -13,6 +13,7 @@ fatfinger.wordMatcher =
             addToList(dict, orig, KEYWORDS_ATOM);
 
             // missing objects from scope
+            dict["window"] = true;
             dict["Math"] = true;
 
             //    addToList(dict, orig, OPERATORS);

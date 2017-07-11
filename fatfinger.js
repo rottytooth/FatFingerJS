@@ -16,6 +16,16 @@ fatfinger.CompileException = function(message) {
    this.message = message;
 };
 
+// globals that JsLint doesn't like for whatever reason
+fatfinger.JslintGlobalList = ["window","browser"];
+
+fatfinger.JslintBlindSpot = function(text) {
+    // these are for globals that jslint doesn't like (such as window)
+    if (fatfinger.JslintGlobalList.indexOf(text) > -1) {
+        return true;
+    }
+    return false;
+}
 ;// jslint.js
 // 2017-04-10
 // Copyright (c) 2015 Douglas Crockford  (www.JSLint.com)
@@ -6468,6 +6478,11 @@ fatfinger.wordMatcher =
             // against keywords
             addToList(dict, orig, KEYWORDS);
             addToList(dict, orig, KEYWORDS_ATOM);
+
+            // missing objects from scope
+            dict["window"] = true;
+            dict["Math"] = true;
+
             //    addToList(dict, orig, OPERATORS);
             //    addToList(dict, orig, OPERATOR_CHARS);
         } else {
@@ -6620,7 +6635,8 @@ fatfinger.wordReplacer.wordReplacerBase = {
                             if (
                                 newlint.warnings[newIdx].column == results.changedNode.column &&
                                 newlint.warnings[newIdx].line == results.changedNode.line &&
-                                newlint.warnings[newIdx].code == results.changedNode.code) {
+                                newlint.warnings[newIdx].code == results.changedNode.code &&
+                                (!newlint.warnings[newIdx].a || !fatfinger.JslintBlindSpot(newlint.warnings[newIdx].a))) {
                                     // we have not actually fixed the problem, as the same warning is in the new lint (same code, same starting place)
                                     notfixed = true;
                             }
@@ -6829,7 +6845,7 @@ fatfinger.wordReplacer.parseLevel.correctText = function(linted, idx, code) {
 
         // if we haven't fixed it yet, let's just do what jslint tells us to
         // FIXME: this really needs to actually test if we're in a var statement                        
-        if (!fixed)
+        if (!fixed && !fatfinger.parsingTools.testParseJs(code))
         {
             var line = linted.lines[warning.line];
             line = line.substr(0, warning.column) +
@@ -6904,17 +6920,25 @@ fatfinger.wordReplacer.badIdentifiers.correctText = function(relinted, idx, code
         var idList = fatfinger.wordMatcher.findPotentialMatches(badIdent, identifiers);
 
         if (idList != null && idList.length > 0) {
-            var lineToFix = relinted.lines[relinted.warnings[idx].line].trimRight();
+            var currLine = relinted.lines[relinted.warnings[idx].line].trimRight();
 
             var possibleLines = [];
 
-            var addAndRemoveBrackets = (lineToFix[lineToFix.length - 1] == "{");
+            var addAndRemoveBrackets = (currLine.charAt(currLine.trim().length - 1) == "{" || // our current line ends with a bracket
+                (relinted.warnings[idx].line < relinted.lines.length - 2 && // our next line starts with a bracket
+                    relinted.lines[relinted.warnings[idx].line + 1].substring(0,1) == "{"));
+            
+            var addedBrackets = "}";
+
             if (addAndRemoveBrackets) {
-                lineToFix += "}";
+                if (!currLine.includes("{")) {
+                    addedBrackets = "{ }"
+                }
+                currLine += addedBrackets;
             }
 
             for(var j = 0; j < idList.length; j++) {
-                var newline = this.replaceWord(lineToFix, relinted.warnings[idx], relinted.warnings[idx].a, idList[j])
+                var newline = this.replaceWord(currLine, relinted.warnings[idx], relinted.warnings[idx].a, idList[j])
 
                 if (fatfinger.parsingTools.testParseJs(newline)) {
                     possibleLines.push({line:newline, score:idList[j].score, place:j});
@@ -6923,13 +6947,14 @@ fatfinger.wordReplacer.badIdentifiers.correctText = function(relinted, idx, code
             var sortedLines = possibleLines.sort(fatfinger.parsingTools.lineSorter);
 
             if (!sortedLines || sortedLines.length == 0) {
-                // we will do nothing in this case -- it means we did not find an identifier replacement that parses
+                // we will do `not`hing in this case -- it means we did not find an identifier replacement that parses
             } else {
                 var returnlines = relinted.lines.slice();
 
                 var lineToAdd = sortedLines[0].line;
-                if (addAndRemoveBrackets) {
-                    lineToAdd = lineToAdd.substr(0, lineToAdd.length - 1);
+
+                if (addAndRemoveBrackets) { 
+                    lineToAdd = lineToAdd.substring(0, newline.length - addedBrackets.length);
                 }
                 returnlines[relinted.warnings[idx].line] = lineToAdd;
                 code = returnlines.join("\n");
@@ -7016,6 +7041,9 @@ fatfinger.wordReplacer.memberFix.treeWalker = function(node, code, linted, allLo
     if (node.expression) {
         code = this.treeWalker(node.expression, code, linted, allLocalObjects);
     }
+    if (node.else) {
+        code = this.treeWalker(node.else, code, linted, allLocalObjects);
+    }
     if (node.block) {
         code = this.treeWalker(node.block, code, linted, allLocalObjects);
     }
@@ -7070,7 +7098,8 @@ fatfinger.run = function(code) {
         if (e instanceof fatfinger.CompileException) {
             retObj = {
                 succeeded: false,
-                text: e.message
+                error: e.message,
+                text: ""
             };
         };
         retObj = {
@@ -7107,7 +7136,7 @@ function cleanUpForVars(code) {
     var forex = /for\s*\(\s*var/;
 
     while ((match = forex.exec(code)) != null) {
-        console.log("match found at " + match.index);
+        // console.log("match found at " + match.index);
 
         var varstmt = /(var\s+[^;]*)\s*;/.exec(code.substring(match.index, code.length));
         var remain = /var\s+([^;]*)\s*;/.exec(code.substring(match.index, code.length));
@@ -7165,7 +7194,7 @@ fatfinger.inlineScriptRunner =
             }
         }
 
-        alert(js);
+        eval(js);
     }
     
     return {"run" : run};

@@ -3,7 +3,7 @@
     [
         {
             "original":     "functhion r() {\n\t// do a thing\n}\n\nvar x = funckion()  {\n\tvarr str = 'H3ello, Worrld!'\n\n\trr();\n\n\r}\n\nxx();",
-            "transformed":  "function r() {\n\t// do a thing\n}\nvar x = function()  {\n\tvar str = 'H3ello, Worrld!';\n\nr();\n};\nx();",
+            "transformed":  "function r() {\n\t// do a thing\n}\nvar x = function()  {\n\tvar str = 'H3ello, Worrld!'\n\nr();\n}\nx();",
             "description":  "two different functions, both misspelled, one varred, each called, missing paranetheses"
         },
         {
@@ -13,12 +13,12 @@
         },
         {
             "original":     "var g = {};\n\n\nvar h = function(i) {\n\tvar m;\n\ti++;\n\tmm = ii;\n}\n\nfunction j(test1) {\n\tvar k = test2;\n\tkk++;\n}\n\nj(gg);\nh(ga);",
-            "transformed":  "var g = {};\n\n\nvar h = function(i) {\n\tvar m;\n\ti++;\n\tm = i;\n};\n\nfunction j(test1) {\n\tvar k = test1;\n\tk++;\n}\n\nj(g);\nh(g);",
+            "transformed":  "var g = {};\n\n\nvar h = function(i) {\n\tvar m;\n\ti++;\n\tm = i;\n}\n\nfunction j(test1) {\n\tvar k = test1;\n\tk++;\n}\n\nj(g);\nh(g);",
             "description":  "two types of functions; with params and local vars"
         },
         {
             "original":     "var t = {\n\ttest: function() {}\n}\n\nur.terst()",
-            "transformed":  "var t = {\n\ttest: function() {}\n};\n\nt.test();",
+            "transformed":  "var t = {\n\ttest: function() {}\n}\n\nt.test()",
             "description":  "function containing function"
         },
         {

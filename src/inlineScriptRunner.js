@@ -38,7 +38,7 @@ fatfinger.inlineScriptRunner =
             }
         }
 
-        alert(js);
+        eval(js);
     }
     
     return {"run" : run};

@@ -1,1 +1,0 @@
-Any .js file here should be valid JavaScript, to be used as additional tests
