@@ -70,7 +70,7 @@ function cleanUpForVars(code) {
     var forex = /for\s*\(\s*var/;
 
     while ((match = forex.exec(code)) != null) {
-        console.log("match found at " + match.index);
+//        console.log("match found at " + match.index);
 
         var varstmt = /(var\s+[^;]*)\s*;/.exec(code.substring(match.index, code.length));
         var remain = /var\s+([^;]*)\s*;/.exec(code.substring(match.index, code.length));

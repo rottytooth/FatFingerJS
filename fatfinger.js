@@ -6468,6 +6468,10 @@ fatfinger.wordMatcher =
             // against keywords
             addToList(dict, orig, KEYWORDS);
             addToList(dict, orig, KEYWORDS_ATOM);
+
+            // missing objects from scope
+            dict["Math"] = true;
+
             //    addToList(dict, orig, OPERATORS);
             //    addToList(dict, orig, OPERATOR_CHARS);
         } else {
@@ -6541,7 +6545,7 @@ fatfinger.wordReplacer = {};
 fatfinger.wordReplacer.wordReplacerBase = {
 
     // options for jslint
-    lintOptions: {browser: true, multivar: true, for: true, this: true, white: true, devel: true, single: true},
+    lintOptions: {browser: true, multivar: true, for: true, this: true, white: true, devel: true, single: true, es6: true},
 
     fixCode: function(code) {
 
@@ -7016,6 +7020,9 @@ fatfinger.wordReplacer.memberFix.treeWalker = function(node, code, linted, allLo
     if (node.expression) {
         code = this.treeWalker(node.expression, code, linted, allLocalObjects);
     }
+    if (node.else) {
+        code = this.treeWalker(node.else, code, linted, allLocalObjects);
+    }
     if (node.block) {
         code = this.treeWalker(node.block, code, linted, allLocalObjects);
     }
@@ -7107,7 +7114,7 @@ function cleanUpForVars(code) {
     var forex = /for\s*\(\s*var/;
 
     while ((match = forex.exec(code)) != null) {
-        console.log("match found at " + match.index);
+//        console.log("match found at " + match.index);
 
         var varstmt = /(var\s+[^;]*)\s*;/.exec(code.substring(match.index, code.length));
         var remain = /var\s+([^;]*)\s*;/.exec(code.substring(match.index, code.length));
