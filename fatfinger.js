@@ -6556,7 +6556,7 @@ fatfinger.wordReplacer = {};
 fatfinger.wordReplacer.wordReplacerBase = {
 
     // options for jslint
-    lintOptions: {browser: true, multivar: true, for: true, this: true, white: true, devel: true, single: true},
+    lintOptions: {browser: true, multivar: true, for: true, this: true, white: true, devel: true, single: true, es6: true},
 
     fixCode: function(code) {
 
