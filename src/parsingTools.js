@@ -2,16 +2,17 @@
 fatfinger.parsingTools = 
 (function(){
 
+        if (typeof esprima == "undefined") {
+            console.log("created esprima");
+            esprima = require('esprima');
+        }
+
         var testParseJs = function(code) {
             try {
-                ast = parse(code);
+                ast = esprima.parse(code);
             } 
             catch(err) {
-                if (err instanceof JS_Parse_Error) {
-                    return false;
-                }
-                else
-                    throw err;
+                return false;
             }
             return true;
         };

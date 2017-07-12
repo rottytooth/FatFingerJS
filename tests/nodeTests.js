@@ -29,6 +29,7 @@ var runJsTests = function(dirname, test) {
     var target = ".js";
     if (filename.substring(filename.length - target.length) == target) {
 
+      // console.log("TESTING " + filename);
       var content = fs.readFileSync(dirname + filename, "utf8");
       var results = fatfinger.run(content);
 
@@ -37,8 +38,6 @@ var runJsTests = function(dirname, test) {
         fs.rename(dirname + filename, "tests/js_cant_parse/" + filename);
       }
       // no need to report success, since the file move tells us it failed
-//      console.log(results.succeeded);
-//      test.ok(results.succeeded, filename + " parsed");
     }
   }
   test.done();

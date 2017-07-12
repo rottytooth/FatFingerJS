@@ -1,5 +1,3 @@
-//require("../lib/parse-js.js");
-
 fatfinger.wordMatcher = 
 (function() {
 

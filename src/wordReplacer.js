@@ -1,7 +1,3 @@
-//require("../lib/parse-js.js");
-//require("../lib/jslint.js");
-//require("parsingTools.js");
-
 fatfinger.wordReplacer = {};
 
 // template design pattern
@@ -376,7 +372,7 @@ fatfinger.wordReplacer.badIdentifiers.correctText = function(relinted, idx, code
 
             var possibleLines = [];
 
-            var addAndRemoveBrackets = (currLine.charAt(currLine.trim().length - 1) == "{" || // our current line ends with a bracket
+            var addAndRemoveBrackets = (currLine.trim().charAt(currLine.trim().length - 1) == "{" || // our current line ends with a bracket
                 (relinted.warnings[idx].line < relinted.lines.length - 2 && // our next line starts with a bracket
                     relinted.lines[relinted.warnings[idx].line + 1].substring(0,1) == "{"));
             

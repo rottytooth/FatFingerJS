@@ -37,7 +37,7 @@ module.exports = function(grunt) {
             separator: ';',
         },
         dist: {
-            src: ['src/bigHeader.js','lib/jslint.js','lib/parse-js.js', 'src/parsingTools.js', 'src/wordMatcher.js', 'src/wordReplacer.js', 'src/fatfinger-main.js', 'src/inlineScriptRunner.js'],
+            src: ['src/bigHeader.js','lib/jslint.js','lib/parse-js.js','lib/esprima.js','src/parsingTools.js', 'src/wordMatcher.js', 'src/wordReplacer.js', 'src/fatfinger-main.js', 'src/inlineScriptRunner.js'],
             dest: 'fatfinger.js',
         },
     }

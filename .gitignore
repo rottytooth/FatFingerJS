@@ -51,4 +51,5 @@ node_modules
 # for now, ignoring the additional js tests since there are many
 tests/js/*.js
 tests/js_cant_parse/*.js
+tests/too_long/*.js
 src/fatfinger-main.js
