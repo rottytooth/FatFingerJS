@@ -1,16 +1,15 @@
 # FatFingerJS
 
 **FatFinger** is a JavaScript library expanding JS to allow typos and
-misspellings as valid code. Why bother with clean, well-formatted JS when you 
+misspellings. Why bother with clean, well-formatted code when you 
 can write this and FatFinger will guess at your intentions?
 
 ~~~
     <script type="text/javascript" src="FatFingerJS.js"></script>   
-    <script type="text/javoscript"><!-- any misspelling of javascript works here -->
-        // here is my inline javascirrrrpt!
-        vart x = "herrrllo werld"
+    <script type="text/javoscript"> // any misspelling of javascript works here
 
-        dokkkkumint.rit3(xx)
+            vart x = "herrrllo werld"
+            dokkkkumint.rit3(xx)
     </script>
 ~~~
 
@@ -21,6 +20,9 @@ Don't bother with semi-colons. Open brackets and never close them. Misspell keyw
 * Question [forty-five years of advice](https://www.cs.utexas.edu/~EWD/transcriptions/EWD03xx/EWD340.html) against expressiveness in the text of code
 * Play against the [compulsiveness of programming](https://www.sac.edu/AcademicProgs/Business/ComputerScience/Pages/Hester_James/HACKER.htm)
 * Embrace the chaos of JavaScript
+
+**Does it work?**
+* Sometimes!
 
 **How to use**
 
@@ -39,7 +41,7 @@ npm install grunt-contrib-nodeunit --save-dev
 
 npm install grunt-contrib-concat --save-dev
 
-npm install -g esprima
+npm install esprima
 ~~~
 
 
