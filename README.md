@@ -26,7 +26,7 @@ Don't bother with semi-colons. Open brackets and never close them. Misspell keyw
 
 **How to use**
 
-Include fatfinger.js in your project, add a script tag with any misspelling of JavaScript containing your FatFingered code. You'll need to declare all your vars as if option explicit; FatFinger assumes implicit declarations are actually misspelled statements. FatFinger has a poor concept of scope, so if you're doing fancy OO stuff, ask yourself: is there a good reason I haven't made everything global??? If not, this might not be the right library / coding style for you.
+Include fatfinger.js in your project, add a script tag with any misspelling of JavaScript containing your FatFingered code. You'll need to declare all your vars as if option explicit; FatFinger assumes implicit declarations are actually misspelled assignments. FatFinger has a poor concept of scope, so if you're doing fancy OO stuff, ask yourself: is there a good reason I haven't made everything global??? If so, this might not be the right library / coding style for you.
 
 **Set-up if you'd like to contribute:**
 
