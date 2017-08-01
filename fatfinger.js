@@ -11791,15 +11791,6 @@ fatfinger.parsingTools =
 
         var correctLineForKeywords = function(line) {
 
-            // // load words with each token in the line
-            // var tgetter = tokenizer(line);
-            // var token = tgetter();
-            // var words = [];
-            // while(token.type != "eof") {
-            //     words.push(token);
-            //     token = tgetter();
-            // } 
-
             var words = esprima.tokenize(line, { loc: true });
 
             var possibleLines = [];
@@ -12252,7 +12243,7 @@ fatfinger.wordReplacer.loadGlobals = function() {
     if (typeof module === 'undefined' || typeof module.exports === 'undefined') {
         // get what's in scope from the browser
         for (var k in window ) {
-            if (k != 'fatfinger' && k!= 'jslint') { // don't add the framework
+            if (k != 'fatfinger' && k!= 'jslint' && k!='esprima') { // don't add the framework
                 globals[k] = true;
             }
         }
@@ -12315,7 +12306,7 @@ fatfinger.wordReplacer.badIdentifiers.correctText = function(relinted, idx, code
             var sortedLines = possibleLines.sort(fatfinger.parsingTools.lineSorter);
 
             if (!sortedLines || sortedLines.length == 0) {
-                // we will do `not`hing in this case -- it means we did not find an identifier replacement that parses
+                // we will do nothing in this case -- it means we did not find an identifier replacement that parses
             } else {
                 var returnlines = relinted.lines.slice();
 
@@ -12435,11 +12426,13 @@ fatfinger.wordReplacer.memberFix.alternateSearch = function(linted, code) {
 
 fatfinger.run = function(code) {
 
-    // try 
-    // {
+    try 
+    {
         code = addBracketsToEnd(code);
 
         code = cleanUpForVars(code);
+
+        code = reorderLinebreaks(code);
 
         var prevCode = code;
 
@@ -12460,21 +12453,21 @@ fatfinger.run = function(code) {
 
         // if there are obj members we don't recognize, see if we can guess what they should be
         code = fatfinger.wordReplacer.memberFix.fixCode(code);
-    // }
-    // catch(e) {
-    //     var retObj;
-    //     if (e instanceof fatfinger.CompileException) {
-    //         retObj = {
-    //             succeeded: false,
-    //             error: e.message,
-    //             text: ""
-    //         };
-    //     };
-    //     retObj = {
-    //         succeeded: false
-    //     };
-    //     return retObj;
-    // }
+    }
+    catch(e) {
+        var retObj;
+        if (e instanceof fatfinger.CompileException) {
+            retObj = {
+                succeeded: false,
+                error: e.message,
+                text: ""
+            };
+        };
+        retObj = {
+            succeeded: false
+        };
+        return retObj;
+    }
 
 
     var retObj = {
@@ -12516,6 +12509,16 @@ function cleanUpForVars(code) {
 
     }
 
+    return code;
+}
+
+// put linebreaks at the places jslint is most likely to give us expected errors
+function reorderLinebreaks(code) {
+    var re = /\n\s*{/;
+    var check;
+    while((check = re.exec(code)) !== null) {
+        code = code.substring(0, check.index) + " {\n" + code.substring(check.index + check[0].length, code.length);
+    }
     return code;
 }
 

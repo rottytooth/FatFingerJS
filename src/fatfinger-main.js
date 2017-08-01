@@ -8,6 +8,8 @@ fatfinger.run = function(code) {
 
         code = cleanUpForVars(code);
 
+        code = reorderLinebreaks(code);
+
         var prevCode = code;
 
         // if it doesn't parse, fix that first
@@ -83,6 +85,16 @@ function cleanUpForVars(code) {
 
     }
 
+    return code;
+}
+
+// put linebreaks at the places jslint is most likely to give us expected errors (before braces)
+function reorderLinebreaks(code) {
+    var re = /\n\s*{/;
+    var check;
+    while((check = re.exec(code)) !== null) {
+        code = code.substring(0, check.index) + " {\n" + code.substring(check.index + check[0].length, code.length);
+    }
     return code;
 }
 

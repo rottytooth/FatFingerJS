@@ -217,6 +217,7 @@ fatfinger.wordReplacer.parseLevel.correctText = function(linted, idx, code) {
             var currLine = linted.lines[warning.line];
 
             // if we think it needs brackets, give it brackets for the test
+            // FIXME: This perhaps can be combined with the other "addAndRemoveBrackets" below in "bad identifiers" section
             var addAndRemoveBrackets = (warning.a == ';' && 
                 (warning.b == '{' || // jslint sees a bracket and thinks it shouldn't be there 
                 currLine.trim().charAt(currLine.trim().length - 1) == "{" || // our current line ends with a bracket
@@ -292,7 +293,7 @@ fatfinger.wordReplacer.parseLevel.correctText = function(linted, idx, code) {
         }
 
         // if we haven't fixed it yet, let's just do what jslint tells us to
-        // FIXME: this really needs to actually test if we're in a var statement                        
+        // This was fixed a while ago to ONLY do that in the case that the code is not parsing
         if (!fixed && !fatfinger.parsingTools.testParseJs(code))
         {
             var line = linted.lines[warning.line];
@@ -332,7 +333,7 @@ fatfinger.wordReplacer.loadGlobals = function() {
     if (typeof module === 'undefined' || typeof module.exports === 'undefined') {
         // get what's in scope from the browser
         for (var k in window ) {
-            if (k != 'fatfinger' && k!= 'jslint') { // don't add the framework
+            if (k != 'fatfinger' && k!= 'jslint' && k!='esprima') { // don't add the framework
                 globals[k] = true;
             }
         }
@@ -395,7 +396,7 @@ fatfinger.wordReplacer.badIdentifiers.correctText = function(relinted, idx, code
             var sortedLines = possibleLines.sort(fatfinger.parsingTools.lineSorter);
 
             if (!sortedLines || sortedLines.length == 0) {
-                // we will do `not`hing in this case -- it means we did not find an identifier replacement that parses
+                // we will do nothing in this case -- it means we did not find an identifier replacement that parses
             } else {
                 var returnlines = relinted.lines.slice();
 
