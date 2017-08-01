@@ -29,28 +29,21 @@ fatfinger.parsingTools =
 
         var correctLineForKeywords = function(line) {
 
-            // load words with each token in the line
-            var tgetter = tokenizer(line);
-            var token = tgetter();
-            var words = [];
-            while(token.type != "eof") {
-                words.push(token);
-                token = tgetter();
-            } 
+            var words = esprima.tokenize(line, { loc: true });
 
             var possibleLines = [];
 
             // try swapping in our replacement keywords until we get something that parses
             for(var locIdx = words.length - 1; locIdx >= 0; locIdx--) { // locIdx = location in the string (by word)
-                if (words[locIdx].type != "name") { continue; }
+                if (words[locIdx].type != "Identifier") { continue; }
 
                 var wordReplaceList = fatfinger.wordMatcher.findPotentialMatches(words[locIdx].value);
 
                 for (var replaceIdx = 0; replaceIdx < wordReplaceList.length; replaceIdx++) // replaceIdx = which replacement word to use
                 {
-                    var newline = line.substring(0, words[locIdx].pos);
+                    var newline = line.substring(0, words[locIdx].loc.start.column);
                     newline += wordReplaceList[replaceIdx].word;
-                    newline += line.substring(words[locIdx].endpos, words[locIdx].length);
+                    newline += line.substring(words[locIdx].loc.end.column, words[locIdx].length);
                     // console.debug(newline); (for debug)
 
                     score = wordReplaceList[replaceIdx].score;

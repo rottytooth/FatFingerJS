@@ -7,8 +7,8 @@ fatfinger.wordMatcher =
         if (!dictionary) {
             
             // against keywords
-            addToList(dict, orig, KEYWORDS);
-            addToList(dict, orig, KEYWORDS_ATOM);
+            addToList(dict, orig, fatfinger.Keywords);
+            addToList(dict, orig, fatfinger.Keywords_Atom);
 
             // missing objects from scope
             dict["window"] = true;
