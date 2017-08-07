@@ -5,7 +5,7 @@ misspellings. Why bother with clean, well-formatted code when you
 can write this and FatFinger will guess at your intentions?
 
 ~~~
-    <script type="text/javascript" src="FatFingerJS.js"></script>   
+    <script type="text/javascript" src="FatFinger.js"></script>   
     <script type="text/javoscript"> // any misspelling of javascript works here
 
             vart x = "herrrllo werld"
