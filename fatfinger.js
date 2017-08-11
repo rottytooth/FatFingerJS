@@ -12128,6 +12128,7 @@ fatfinger.wordReplacer.parseLevel.correctText = function(linted, idx, code) {
             var currLine = linted.lines[warning.line];
 
             // if we think it needs brackets, give it brackets for the test
+            // FIXME: This perhaps can be combined with the other "addAndRemoveBrackets" below in "bad identifiers" section
             var addAndRemoveBrackets = (warning.a == ';' && 
                 (warning.b == '{' || // jslint sees a bracket and thinks it shouldn't be there 
                 currLine.trim().charAt(currLine.trim().length - 1) == "{" || // our current line ends with a bracket
@@ -12203,7 +12204,7 @@ fatfinger.wordReplacer.parseLevel.correctText = function(linted, idx, code) {
         }
 
         // if we haven't fixed it yet, let's just do what jslint tells us to
-        // FIXME: this really needs to actually test if we're in a var statement                        
+        // This was fixed a while ago to ONLY do that in the case that the code is not parsing
         if (!fixed && !fatfinger.parsingTools.testParseJs(code))
         {
             var line = linted.lines[warning.line];
@@ -12247,6 +12248,8 @@ fatfinger.wordReplacer.loadGlobals = function() {
                 globals[k] = true;
             }
         }
+        // sometimes console doesn't show up -- for a number of reasons -- but we always want it
+        globals["console"] = true
     } else {
         // FIXME: we should add some fake browser stuff here for testing
     }
@@ -12512,7 +12515,7 @@ function cleanUpForVars(code) {
     return code;
 }
 
-// put linebreaks at the places jslint is most likely to give us expected errors
+// put linebreaks at the places jslint is most likely to give us expected errors (before braces)
 function reorderLinebreaks(code) {
     var re = /\n\s*{/;
     var check;

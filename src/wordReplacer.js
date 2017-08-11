@@ -337,6 +337,8 @@ fatfinger.wordReplacer.loadGlobals = function() {
                 globals[k] = true;
             }
         }
+        // sometimes console doesn't show up -- for a number of reasons -- but we always want it
+        globals["console"] = true
     } else {
         // FIXME: we should add some fake browser stuff here for testing
     }
