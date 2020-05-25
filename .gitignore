@@ -53,3 +53,4 @@ tests/js/*.js
 tests/js_cant_parse/*.js
 tests/too_long/*.js
 src/fatfinger-main.js
+.vscode
