@@ -1,6 +1,6 @@
 {
   "name": "fatfinger",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Write JS with your fists",
   "repository": {
     "type": "git",
@@ -13,10 +13,12 @@
     }
   ],
   "devDependencies": {
-    "grunt": "^1.0.1",
-    "grunt-contrib-concat": "^1.0.1",
-    "grunt-contrib-jshint": "^1.1.0",
-    "grunt-contrib-nodeunit": "^1.0.0",
-    "grunt-contrib-uglify": "~0.5.0"
+    "grunt": "^1.6.1",
+    "grunt-contrib-concat": "^2.1.0",
+    "grunt-contrib-jshint": "^3.2.0",
+    "grunt-contrib-nodeunit": "^5.0.0"
+  },
+  "dependencies": {
+    "esprima": "^4.0.1"
   }
 }
