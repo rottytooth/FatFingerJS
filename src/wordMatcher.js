@@ -29,7 +29,9 @@ PRIVATE FUNCTIONS
 
     function addToList(dict, orig, tokenlist) {
         Object.keys(tokenlist).forEach(function(word) {
-            dict.push({ word: word, score: distance(orig, word)});
+            var score = distance(orig, word);
+            if (orig.length < 5 && score > orig.length) return;
+            dict.push({ word: word, score: score});
         });    
         return dict;
     }

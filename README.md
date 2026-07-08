@@ -30,20 +30,12 @@ Include fatfinger.js in your project, add a script tag with any misspelling of J
 
 ### Contribute
 
-Any contributions are appreciated! You'll need to set up Grunt and install these packages:
+Any contributions are appreciated! You'll need to install grunt, then the dependencies:
 
 ~~~
 npm install -g grunt-cli
 
-npm install grunt --save-dev
-
-npm install grunt-contrib-jshint --save-dev
-
-npm install grunt-contrib-nodeunit --save-dev
-
-npm install grunt-contrib-concat --save-dev
-
-npm install esprima
+npm install
 ~~~
 
 
@@ -56,3 +48,5 @@ To run the tests:
 ~~~
 grunt nodeunit
 ~~~
+
+**Note:** There's vulnerabilities but not in the "production" code (lol), meaning the fatfinger.js file itself -- only around nodeunit. I'll switch to another test framework when I have a chance

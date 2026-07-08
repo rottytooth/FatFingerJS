@@ -1,6 +1,6 @@
 {
-  "name": "fatfinger",
-  "version": "0.2.0",
+  "name": "FatFinger",
+  "version": "0.3.0",
   "description": "Write JS with your fists",
   "repository": {
     "type": "git",
@@ -20,5 +20,8 @@
   },
   "dependencies": {
     "esprima": "^4.0.1"
+  },
+  "overrides": {
+    "js-yaml": ">=3.15.0"
   }
 }
