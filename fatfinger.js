@@ -11861,7 +11861,9 @@ PRIVATE FUNCTIONS
 
     function addToList(dict, orig, tokenlist) {
         Object.keys(tokenlist).forEach(function(word) {
-            dict.push({ word: word, score: distance(orig, word)});
+            var score = distance(orig, word);
+            if (orig.length < 5 && score > orig.length) return;
+            dict.push({ word: word, score: score});
         });    
         return dict;
     }
@@ -12248,11 +12250,32 @@ fatfinger.wordReplacer.loadGlobals = function() {
                 globals[k] = true;
             }
         }
-        // sometimes console doesn't show up -- for a number of reasons -- but we always want it
-        globals["console"] = true
-    } else {
-        // FIXME: we should add some fake browser stuff here for testing
     }
+
+    // always include these, regardless of environment (if we're in the browser), so that we can test in Node.js (no one is using this in Node)
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects
+    var browserGlobals = [
+        // console & timing
+        "console", "setTimeout", "setInterval", "clearTimeout", "clearInterval",
+        "requestAnimationFrame", "cancelAnimationFrame",
+        // core browser objects
+        "window", "document", "navigator", "location", "history", "screen",
+        // DOM construction & querying
+        "Element", "HTMLElement", "Node", "NodeList", "Event", "CustomEvent",
+        "EventTarget", "MutationObserver", "IntersectionObserver", "ResizeObserver",
+        // storage & comms
+        "localStorage", "sessionStorage", "IndexedDB", "XMLHttpRequest", "fetch", "WebSocket",
+        // dialogs
+        "alert", "confirm", "prompt",
+        // global constructors & utilities
+        "Object", "Array", "Function", "String", "Number", "Boolean", "Symbol",
+        "Date", "RegExp", "Error", "Map", "Set", "WeakMap", "WeakSet",
+        "Promise", "Proxy", "Reflect", "JSON", "Math", "parseInt", "parseFloat", "isNaN", "isFinite", "encodeURI", "encodeURIComponent", "decodeURI", "decodeURIComponent"
+    ];
+    for (var i = 0; i < browserGlobals.length; i++) {
+        globals[browserGlobals[i]] = true;
+    }
+
     return globals;
 }
 
@@ -12346,18 +12369,86 @@ fatfinger.wordReplacer.memberFix = fatfinger.wordReplacer.inherit(fatfinger.word
 
 fatfinger.wordReplacer.memberFix.global_obj = fatfinger.wordReplacer.loadGlobals();
 
+fatfinger.wordReplacer.memberFix.domFallback = {
+    document : [
+        "getEleentById", "getElementsByClassName", "getElementsByTagName", "querySelector", "querySelectorAll", "createElement", "createTextNode", "createDocumentFragment", "createEvent", "addEventListener", "removeEventListener", "dispatchEvent", "body", "head", "title", "cookie", "URL", "documentElement", "readyState", "write", "writeln"
+    ],
+    window: [
+        "addEventListener", "removeEventListener", "dispatchEvent", "setTimeout", "setInterval", "clearTimeout", "clearInterval", "requestAnimationFrame", "cancelAnimationFrame", "alert", "confirm", "prompt", "open", "close", "focus", "blur", "scrollTo", "scrollBy", "scroll", "location", "history", "navigator", "innerWidth", "innerHeight", "outerWidth", "outerHeight", "pageXOffset", "pageYOffset", "localStorage", "sessionStorage", "fetch", "postMessage"
+    ],
+    navigator: [
+        "userAgent", "platform", "language", "languages", "onLine", "geolocation", "mediaDevices", "clipboard", "permissions", "cookieEnabled", "appName", "appVersion", "vendor"
+    ],
+    location: [
+        "href", "hostname", "pathname", "search", "hash", "protocol", "port", "host", "origin", "assign", "reload", "replace"
+    ],
+    history: ["length", "state", "back", "forward", "go", "pushState", "replaceState"],
+    localStorage: ["getItem", "setItem", "removeItem", "clear", "key", "length"],
+    sessionStorage: ["getItem", "setItem", "removeItem", "clear", "key", "length"],
+    element: [
+        "addEventListener", "removeEventListener", "dispatchEvent", "getAttribute", "setAttribute", "removeAttribute", "hasAttribute", "querySelector", "querySelectorAll", "getElementsByClassName", "getElementsByTagName", "appendChild", "removeChild", "insertBefore", "replaceChild", "cloneNode", "contains", "closest", "matches",
+        "getBoundingClientRect", "scrollIntoView", "focus", "blur", "click",
+        "id", "innerHTML", "innerText", "textContent", "classList", "style", "parentNode", "parentElement", "children", "childNodes", "firstChild", "lastChild", "nextSibling", "previousSibling", "tagName", "nodeName", "nodeType", "nodeValue", "offsetWidth", "offsetHeight", "offsetTop", "offsetLeft"
+    ]
+};
+
 fatfinger.wordReplacer.memberFix.canWeExit = function(linted) { }
 
 fatfinger.wordReplacer.memberFix.test = function(code) { return true; };
+
+// Build a map of { varName: {propName: true }} from object literal declarations in the AST
+fatfinger.wordReplacer.memberFix.buildObjectProperties = function(node, objMap) {
+    if (!objMap) objMap = {};
+    if (!node) return objMap;
+
+    if (Array.isArray(node)) {
+        for (var i = 0; i < node.length; i++) {
+            this.buildObjectProperties(node[i], objMap);
+        }
+        return objMap;
+    }
+
+    // var/const declarations: look for names whose expression is an object literal
+    if (node.id == "var" || node.id == "const") {
+        if (node.names) {
+            for (var j = 0; j < node.names.length; j++) {
+                var nameNode = node.names[j];
+                if (nameNode.expression && nameNode.expression.id == "{") {
+                    var props = {};
+                    var entries = nameNode.expression.expression || [];
+                    for (var k = 0; k < entries.length; k++) {
+                        if (entries[k].label && entries[k].label.id) {
+                            props[entries[k].label.id] = true;
+                        }
+                    }
+                    objMap[nameNode.id] = props;
+                }
+            }
+        }
+    }
+
+    // recurse into child nodes
+    if (node.block) {
+        this.buildObjectProperties(node.block, objMap);
+    }
+    if (node.expression) {
+        this.buildObjectProperties(node.expression, objMap);
+    }
+    if (node.else) {
+        this.buildObjectProperties(node.else, objMap);
+    }
+
+    return objMap;
+}
 
 // We are not dealing with the warnings this loop, but with the tree itself. We need to allow
 // for resetting the tree, since changing names will change string lengths and so locations
 fatfinger.wordReplacer.memberFix.lastCheckedLocation = 0;
 
-fatfinger.wordReplacer.memberFix.treeWalker = function(node, code, linted, allLocalObjects) {
+fatfinger.wordReplacer.memberFix.treeWalker = function(node, code, linted, allLocalObjects, objProps) {
     if (Array.isArray(node)) {
         for (var i = 0; i < node.length; i++) {
-            code = this.treeWalker(node[i], code, linted, allLocalObjects);
+            code = this.treeWalker(node[i], code, linted, allLocalObjects, objProps);
         }
     }
     if (node.id && node.id == ".") {
@@ -12372,21 +12463,51 @@ fatfinger.wordReplacer.memberFix.treeWalker = function(node, code, linted, allLo
             endOfDot = node.name.id;
         }
         if (frontOfDot && endOfDot) {
-            // for members, when they hit this method
-            // allLocalObjects = this.buildLocalIdentifiers(linted.tree, {}, frontOfDot);
 
             var obj;
             var possibleProps = {};
 
-            // assume it's a local obj first
-            if (allLocalObjects[frontOfDot]) {
-                possibleProps = allLocalObjects
+            // check if we have known properties for this local object
+            if (objProps && objProps[frontOfDot]) {
+                possibleProps = objProps[frontOfDot];
+            } else if (allLocalObjects[frontOfDot]) {
+                // fall back to all locals if no property map
+                possibleProps = allLocalObjects;
             }
-            // only if not in node, try to get it as a built-in obj
+
             if (typeof module === 'undefined' || typeof module.exports === 'undefined') {
+                // in the browser: enumerate from window
                 obj = window[frontOfDot];
-                for (var prop in obj) {
-                    possibleProps[prop] = true;
+                if (obj) {
+                    for (var prop in obj) {
+                        possibleProps[prop] = true;
+                    }
+                }
+            } else {
+                // in Node: enumerate from global
+                obj = global[frontOfDot];
+                if (obj) {
+                    var propNames = Object.getOwnPropertyNames(obj);
+                    for (var pi = 0; pi < propNames.length; pi++) {
+                        possibleProps[propNames[pi]] = true;
+                    }
+
+                    // also walk the prototype chain
+                    var proto = Object.getPrototypeOf(obj);
+                    while (proto && proto !== Object.prototype) {
+                        var protoNames = Object.getOwnPropertyNames(proto);
+                        for (var ppi = 0; ppi < protoNames.length; ppi++) {
+                            possibleProps[protoNames[ppi]] = true;
+                        }
+                        proto = Object.getPrototypeOf(proto);
+                    }
+                }
+                // fall back to static DOM table for objects not in Node's global 
+                var domProps = fatfinger.wordReplacer.memberFix.domFallback[frontOfDot.toLowerCase()];
+                if (domProps) {
+                    for (var di = 0; di < domProps.length; di++) {
+                        possibleProps[domProps[di]] = true;
+                    }
                 }
             }
 
@@ -12401,13 +12522,13 @@ fatfinger.wordReplacer.memberFix.treeWalker = function(node, code, linted, allLo
         }
     }
     if (node.expression) {
-        code = this.treeWalker(node.expression, code, linted, allLocalObjects);
+        code = this.treeWalker(node.expression, code, linted, allLocalObjects, objProps);
     }
     if (node.else) {
-        code = this.treeWalker(node.else, code, linted, allLocalObjects);
+        code = this.treeWalker(node.else, code, linted, allLocalObjects, objProps);
     }
     if (node.block) {
-        code = this.treeWalker(node.block, code, linted, allLocalObjects);
+        code = this.treeWalker(node.block, code, linted, allLocalObjects, objProps);
     }
     return code;
 }
@@ -12415,8 +12536,9 @@ fatfinger.wordReplacer.memberFix.treeWalker = function(node, code, linted, allLo
 fatfinger.wordReplacer.memberFix.alternateSearch = function(linted, code) {
 
     var allLocalObjects = this.buildLocalIdentifiers(linted.tree, {});
+    var objProps = this.buildObjectProperties(linted.tree, {});
 
-    code = this.treeWalker(linted.tree, code, linted, allLocalObjects);
+    code = this.treeWalker(linted.tree, code, linted, allLocalObjects, objProps);
 
     var retObj = {
         madeAChange: false,

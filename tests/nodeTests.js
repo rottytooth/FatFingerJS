@@ -43,7 +43,24 @@ var runJsTests = function(dirname, test) {
   test.done();
 }
 
+var run99botTest = function(test) {
+  var input = fs.readFileSync("tests/99bot.js", "utf8");
+  var expected = fs.readFileSync("tests/99bot_expected.js", "utf8");
+  var results = fatfinger.run(input);
+
+  test.ok(results.succeeded, "99bot.js parsed successfully");
+  test.equal(
+    results.text.replace(/\s+/g, ""),
+    expected.replace(/\s+/g, ""),
+    "99bot.js translates to 99bot_expec"
+  );
+  test.done();
+}
+
 exports.nodeunit = {
+  bot99: function(test) {
+    run99botTest(test);
+  },
   keywords: function(test) {
     runTest("keywords.json", test);
   },
