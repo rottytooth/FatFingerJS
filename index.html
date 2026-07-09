@@ -51,13 +51,13 @@
 
                 errors.textContent = '';
                 output.textContent = '';
-                newprogram.textContent = '';
+                newprogram.value = '';
 
                 var code = jstext.value;
 
                 var result = fatfinger.run(code);
                 if (result.text) {
-                    newprogram.textContent = result.text;
+                    newprogram.value = result.text;
                     if (result.succeeded)
                     {
                         ast = esprima.parse(result.text);
@@ -80,13 +80,14 @@
     </script>
 </head>
 <body>
-    <h1><img src="FatFinger_logo.svg" alt="FatFingerJS" width="242" height="53" /></h1>
-
-    <h2><a href="http://danieltemkin.com">Daniel Temkin</a>, 2017</h2>
-    <h2><a href="https://github.com/rottytooth/FatFingerJS">on GitHub</a></h2>
-    <h2>One of <a href="https://mitpress.mit.edu/9780262553087/forty-four-esolangs/">Forty-Four Esolangs</a> (2025, MIT Press)</h2>
-
-    <br id="headerBreak" />
+    <header>
+        <h1><img src="FatFinger_logo.svg" alt="FatFingerJS" width="242" height="53" /></h1>
+        <p class="credits">
+            (2017, <a href="http://danieltemkin.com">Daniel Temkin</a>) |
+            <a href="https://github.com/rottytooth/FatFingerJS">on GitHub</a> |
+            One of <a href="https://mitpress.mit.edu/9780262553087/forty-four-esolangs/">Forty-Four Esolangs</a> (2025, MIT Press)
+        </p>
+    </header>
 
     <p>
         FatFinger is a JavaScript library expanding JS to allow typos and
@@ -151,9 +152,7 @@ for (var counter = 99; counter >= 1; counter = counter - 1)
         </div>
         <div class="holder">
             <b>OUTPUT (conventional JavaScript)</b><br><br>
-            <div id="outbox" class="boxy">
-                <pre><code id="newprogram"></code></pre>
-            </div>
+            <textarea id="newprogram" class="boxy" readonly></textarea>
         </div>
         <div class="holder" id="treeHolder">
             <b>SYNTAX TREE</b><br /><br />
