@@ -1,0 +1,239 @@
+/* ── Color tokens ── */
+:root {
+    --bg:         #0c0e10;
+    --surface:    #14181c;
+    --surface-hi: #1b2028;
+    --border:     #2b333d;
+    --text:       #dde2ea;
+    --muted:      #7a8290;
+    --accent:     #d98040;
+    --accent-hi:  #e8954f;
+    --link:       #6aafd6;
+    --error:      #e06060;
+}
+
+/* ── Reset / base ── */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    padding: 0 40px 80px;
+    margin: 0 auto;
+    max-width: 1200px;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: Consolas, monaco, monospace;
+    font-size: 18px;
+    line-height: 1.65em;
+}
+
+a {
+    color: var(--link);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--accent-hi);
+    text-decoration: underline;
+}
+
+/* ── Header ── */
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 0 20px;
+    border-bottom: 2px solid var(--accent);
+    margin-bottom: 52px;
+}
+
+h1 {
+    margin: 0;
+    font-size: 1em;
+    font-weight: normal;
+}
+
+.credits {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    color: var(--muted);
+    font-size: 0.82em;
+    line-height: 1em;
+    margin: 0;
+    padding: 0;
+    max-width: none;
+    width: auto;
+}
+
+.credits a {
+    color: var(--muted);
+}
+
+.credits a:hover {
+    color: var(--link);
+    text-decoration: none;
+}
+
+/* ── Section headings ── */
+h3 {
+    font-size: 0.75em;
+    font-weight: bold;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    margin: 2.6em 0 0.8em;
+    padding-bottom: 0.5em;
+    border-bottom: 1px solid var(--border);
+}
+
+/* ── Prose ── */
+p {
+    margin: 0 0 1.4em;
+    line-height: 1.85em;
+}
+
+ul {
+    padding-left: 1.6em;
+    margin: 0 0 1.4em;
+}
+
+li {
+    margin-bottom: 0.4em;
+    line-height: 1.8em;
+}
+
+/* ── Code example block ── */
+pre.greyback {
+    background-color: var(--surface-hi);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 4px 4px 0;
+    color: var(--text);
+    width: 100%;
+    padding: 18px 22px 18px 22px;
+    margin: 0 0 1.4em;
+    overflow-x: auto;
+    line-height: 2em;
+    font-size: 0.88em;
+}
+
+/* ── Interactive section ── */
+#testSection {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 24px;
+    margin-bottom: 2em;
+}
+
+.holder {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.col-label {
+    display: block;
+    font-size: 0.7em;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 10px;
+}
+
+/* ── Code boxes ── */
+.boxy {
+    background-color: var(--surface-hi);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    width: 100%;
+    height: 400px;
+    overflow: auto;
+    margin: 0;
+    font: medium -moz-fixed;
+    font: -webkit-small-control;
+    font-family: Consolas, monaco, monospace;
+    font-size: 15px;
+    line-height: 1.55em;
+}
+
+textarea.boxy {
+    padding: 12px;
+    resize: vertical;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+textarea.boxy:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(217, 128, 64, 0.15);
+}
+
+/* ── Controls row ── */
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+#btnSubmit {
+    background-color: var(--accent);
+    color: #0c0e10;
+    border: none;
+    padding: 9px 28px;
+    border-radius: 4px;
+    font-family: Consolas, monaco, monospace;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: background 0.15s;
+}
+
+#btnSubmit:hover, #btnSubmit:focus {
+    background-color: var(--accent-hi);
+    outline: none;
+}
+
+/* ── Errors ── */
+.errors-label {
+    display: block;
+    font-size: 0.72em;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-top: 14px;
+    margin-bottom: 4px;
+}
+
+#errors {
+    color: var(--error);
+    font-size: 0.9em;
+    min-height: 1.2em;
+}
+
+/* ── Hidden ── */
+#treeHolder  { display: none; }
+#cbTree      { display: none; }
+#cbTreeLabel { display: none; }
+
+/* ── Misc ── */
+ul.pre li { white-space: pre; }
+
+.typo {
+    text-decoration: underline wavy #cc1111;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 5px;
+}
+

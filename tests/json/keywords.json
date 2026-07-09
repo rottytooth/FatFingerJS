@@ -30,6 +30,21 @@
             "original":     "varr x = 0;\n\nfor(var t = 0; t < 10; t++) {\n\n\txxx--;\n}\n\nxx++;",
             "transformed":  "var x = 0;\n\nvar t = 0;\nfor( t = 0; t < 10; t++) {\n\n\tx--;\n}\n\nx++;",
             "description":  "for loop special handling plus ++ to +="
+        },
+        {
+            "original":     "fer (let i = 0; i < 500; i++) { }",
+            "transformed":  "for (let i = 0; i < 500; i++) { }",
+            "description":  "fer should resolve to for based on loop structure"
+        },
+        {
+            "original":     "let i = 10;\nwile (i > 0) {\n\ti--;\n}",
+            "transformed":  "let i = 10;\nwhile (i > 0) {\n\ti--;\n}",
+            "description":  "wile should resolve to while based on loop structure"
+        },
+        {
+            "original":     "let i = 10;\nwihlee (i > 0) {\n\ti--;\n}",
+            "transformed":  "let i = 10;\nwhile (i > 0) {\n\ti--;\n}",
+            "description":  "wile should resolve to while based on loop structure"
         }
     ]
 }
