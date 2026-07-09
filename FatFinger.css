@@ -1,0 +1,163 @@
+body {
+    padding: 20px;
+    margin: 0 auto;
+    margin-bottom: 70px;
+    max-width: 1200px;
+    background-color: #181a1b;
+    color: #e0e0e0;
+}
+
+body, * {
+    font-family: Consolas,monaco,monospace;
+    font-size: 16px;
+    line-height: 1.5em;
+    color: #e0e0e0;
+}
+
+textarea {
+    font-family: 'Courier', monospace;
+    font-size: 16px;
+    padding-top: 15px !important;
+    height: 385px !important;
+    background-color: #232629;
+    color: #e0e0e0;
+    border: 1px solid #444;
+}
+
+.boxy {
+    -moz-appearance: textfield-multiline;
+    -webkit-appearance: textarea;
+    border: 1px solid #444;
+    font: medium -moz-fixed;
+    font: -webkit-small-control;
+    font-size: 16px;
+    overflow: auto;
+    padding: 0px;
+    resize: both;
+    width: 100%;
+    box-sizing: border-box;
+    height: 400px;
+    margin: 0px;
+    background-color: #232629;
+    color: #e0e0e0;
+}
+
+.holder {
+    margin: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
+#treeHolder {
+    display: none;
+}
+
+#cbTree {
+    display: none;
+    margin-top: 15px;
+}
+
+#cbTreeLabel {
+    display: none;
+    margin-right: 60px;
+}
+
+h1 {
+    font-size: 2em;
+    font-weight: normal;
+    color: #fafafa;
+}
+
+h2 {
+    margin-left: 10px;
+    color: #e0e0e0;
+}
+
+#headerBreak {
+    margin-bottom: 20px;
+}
+
+h3 {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #e0e0e0;
+    margin-top: 1.4em;
+}
+
+p, li, textarea, .actions {
+    width: 100%;
+    max-width: 800px;
+}
+
+ul.pre li {
+    white-space: pre;
+}
+
+.checkbox {
+    display: inline-block;
+}
+
+.actions a {
+    float: right;
+    color: #90caf9;
+}
+
+.actions {
+    clear: both;
+}
+
+.greyback {
+    background-color: #232629;
+    width: 100%;
+    line-height: 200%;
+    color: #e0e0e0;
+}
+
+#testSection {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px;
+    background-color: #232629;
+    color: #e0e0e0;
+}
+
+#outbox, .boxy {
+    background-color: #232629;
+    color: #e0e0e0;
+}
+
+p {
+    margin-top: 20px;
+}
+
+p, li {
+    line-height: 180%;
+}
+
+#errors {
+    margin-left: 30px;
+    color: #ff6f6f;
+}
+
+#btnSubmit {
+    background-color: #232629;
+    color: #e0e0e0;
+    border: 1px solid #444;
+    padding: 10px 24px;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+#btnSubmit:hover, #btnSubmit:focus {
+    background-color: #33373a;
+    color: #ffffff;
+    border-color: #90caf9;
+    outline: none;
+}
+
+a {
+    color: #90caf9;
+}

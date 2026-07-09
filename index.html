@@ -2,10 +2,11 @@
 <html>
 <head>
     <title>FatFingerJS</title>
-    <meta name="description" content="FatFinger allows JS to run even with typos; it is a tool and an associated coding style for JS">
+    <meta name="description" content="FatFingerJS: Embrace the Chaos of JavaScript">
     <meta charset="utf-8" />
     <meta property="og:image" content="" />
     <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" href="FatFinger.css" />
     <script type="text/javascript" src="fatfinger.js"></script>
     <script type="text/javascript">
 
@@ -77,138 +78,27 @@
 
         });
     </script>
-    <style>
-        body {
-            padding: 20px;
-            margin-bottom: 70px;
-        }
-
-        body, * {
-            font-family: Consolas,monaco,monospace;
-            font-size: 14px;
-            line-height: 1.4em;
-        }
-        textarea {
-            font: 'Courier', monospace; 
-            padding-top: 15px !important;
-            height: 385px !important;
-        }
-        .boxy {
-            -moz-appearance: textfield-multiline;
-            -webkit-appearance: textarea;
-            border: 1px solid gray;
-            font: medium -moz-fixed;
-            font: -webkit-small-control;
-            overflow: auto;
-            padding: 0px;
-            resize: both;
-            width: 400px;
-            height: 400px;
-            margin: 0px;
-        }
-
-        .holder {
-            margin: 10px;
-            float: left;
-        }
-
-        #treeHolder {
-            display: none;
-        }
-
-        #cbTree {
-            margin-top: 15px;
-        }
-
-        #cbTreeLabel {
-            margin-right: 60px;
-        }
-
-        h1 {
-            font-size: 2em;
-            font-weight: normal;
-        }
-
-        h2 {
-            margin-left: 10px;
-        }
-
-        #headerBreak {
-            margin-bottom: 60px;
-        }
-
-        h3 {
-            font-weight: bold;
-        }
-
-        p, li, textarea, .actions {
-            width: 100%;
-            max-width: 800px;
-        }
-
-        ul.pre li {
-            white-space: pre;
-        }
-
-        .checkbox {
-            display: inline-block;
-        }
-
-        .actions a {
-            float: right;
-        }
-
-        .actions {
-            clear: both;
-        }
-
-        .greyback {
-            background-color: #eeeeee;
-            width: 800px;
-            line-height: 200%;
-        }
-
-        #testSection {
-            overflow: hidden;
-            zoom: 1;
-            background-color: #eeeeee;
-        }
-
-        #outbox, .boxy {
-            background-color: #ffffff;
-        }
-
-        p {
-            margin-top: 20px;
-        }
-        p, li {
-            line-height: 180%;
-        }
-        #errors {
-            margin-left: 30px;
-        }
-    </style>
 </head>
 <body>
     <h1><img src="FatFinger_logo.svg" alt="FatFingerJS" width="242" height="53" /></h1>
 
     <h2><a href="http://danieltemkin.com">Daniel Temkin</a>, 2017</h2>
     <h2><a href="https://github.com/rottytooth/FatFingerJS">on GitHub</a></h2>
+    <h2>One of <a href="https://mitpress.mit.edu/9780262553087/forty-four-esolangs/">Forty-Four Esolangs</a> (2025, MIT Press)</h2>
 
     <br id="headerBreak" />
 
     <p>
         FatFinger is a JavaScript library expanding JS to allow typos and
-        misspellings. Why bother with clean, well-formatted code when you 
+        misspellings as valid code. Why bother with clean, well-formatted JS when you
         can write this and FatFinger will guess at your intentions?
     </p>
-
 
     <pre class="greyback">
 
         &lt;script type="text/javascript" src="fatfinger.js">&lt;/script>
-        &lt;script type="text/javoscript"> // any misspelling of javascript works here
-
+        &lt;script type="text/javoscript">
+            // any misspelling of javascript works in the type attribute above
             vart x = "herrrllo werld"
             dokkkkumint.rit3(xx)
         &lt;/script>
@@ -224,11 +114,6 @@
         <li>Embrace the chaos of JavaScript</li>
     </ul>
 
-    <h3>Does it work?</h3>
-    <ul>
-        <li>Sometimes!</li>
-    </ul>
-    
     <p><b>Test out your code:</b></p>
 
     <div id="testSection">
@@ -259,9 +144,9 @@ for (var counter = 99; counter >= 1; counter = counter - 1)
             <br />
             <input type="checkbox" value="tree" id="cbTree" /><label for="cbTree" id="cbTreeLabel">Draw Syntax Tree</label>
             <input type="button" value="Submit" id="btnSubmit" />
-            <br /><br/>
+            <br /><br />
             <b>Errors:</b>
-            <div id="errors" style="color: #aa0000;"></div>
+            <div id="errors"></div>
             <br />
         </div>
         <div class="holder">
@@ -281,29 +166,34 @@ for (var counter = 99; counter >= 1; counter = counter - 1)
 
     <h3>How To Use</h3>
     <p>
-        Include fatfinger.js in your project, add a script tag with any misspelling of JavaScript 
+        Include fatfinger.js in your project, add a script tag with any misspelling of JavaScript
         containing your FatFingered code. You'll need to declare all your vars as if option
         explicit; FatFinger
-        assumes implicit declarations are actually misspelled assignments.
-        FatFinger has a poor concept of scope, so if you're doing fancy OO stuff, ask yourself: is there a good reason 
-        I haven't made everything global??? If so, this might not be the right library / coding style for you.
+        assumes implicit declarations are actually misspelled statements.
+        FatFinger has a poor concept of scope, so if you're doing fancy OO stuff, ask yourself: is there a good reason
+        I haven't made everything global??? If not, this might not be the right library / coding style for you.
     </p>
 
     <h3>See Also</h3>
 
     <ul>
-        <li><a href="https://github.com/mattdiamond/fuckitjs">FuckItJS</a></li>
+        <li><a href="http://danieltemkin.com/Entropy">Entropy</a> (almost an inverse of FatFinger)</li>
+        <li><a href="https://github.com/mattdiamond/fuckitjs">FuckIt.JS</a></li>
         <li><a href="https://github.com/reinderien/mimic">Mimic</a></li>
         <li><a href="http://jsfuck.com">JSFuck</a></li>
     </ul>
 
-    <h3>Previous Languages</h3>
+    <h3>Other Languages</h3>
 
     <ul>
-        <li><a href="http://danieltemkin.com/Entropy">Entropy</a> (2010)</li>
+        <li><a href="https://danieltemkin.com/Esolangs/Folders">Folders</a> (2015)</li>
+        <li><a href="https://danieltemkin.com/Esolangs/Valence">Valence</a> (2025)</li>
         <li><a href="http://lightpattern.info/">Light Pattern</a> (2012)</li>
-        <li><a href="http://esolangs.org/wiki/Folders">Folders</a> (2015)</li>
-        <li><a href="http://danieltemkin.com/Esolangs">and more...</a></li>
+        <li><a href="http://danieltemkin.com/Esolangs/">and more...</a></li>
     </ul>
+
+    <p>
+        FatFinger is one of <a href="https://mitpress.mit.edu/9780262553087/forty-four-esolangs/">Forty-Four Esolangs</a> discussed in my artist's monograph by MIT Press
+    </p>
 </body>
 </html>

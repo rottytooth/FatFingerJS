@@ -308,6 +308,21 @@ fatfinger.wordReplacer.parseLevel.correctText = function(linted, idx, code) {
         madeAChange = true;
     }
 
+    // Handle mismatched parentheses warning: jslint misreads a keyword (e.g. "fer")
+    // as a function call and then gets confused by semicolons inside the "arguments".
+    // Try keyword substitution on the offending line.
+    if (warning.code == "expected_a_b_from_c_d") {
+        var currLine = linted.lines[warning.line];
+        if (!fatfinger.parsingTools.testParseJs(currLine)) {
+            var newline = fatfinger.parsingTools.correctLineForKeywords(currLine);
+            if (newline != null) {
+                linted.lines[warning.line] = newline;
+                code = linted.lines.join("\n");
+                madeAChange = true;
+            }
+        }
+    }
+
     var retObj = {
         madeAChange: madeAChange,
         code: code
