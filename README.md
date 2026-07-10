@@ -1,5 +1,7 @@
 # FatFingerJS
 
+https://fatfingerjs.com
+
 **FatFinger** is a JavaScript library expanding JS to allow typos and misspellings. Why bother with clean, well-formatted code when you can write this and FatFinger will guess at your intentions?
 
 FatFinger is initialized by including the library with the correct script tag. From that point on, invoke the demon JavaScript with any misspelling of its name, and, like any incantation gone wrong, you will see its truly chaotic side.
